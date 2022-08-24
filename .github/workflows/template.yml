@@ -39,10 +39,10 @@ jobs:
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
-          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvnp --region us-east-1 --query SecretString --output text | jq '.MVNP')
+          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq '.MVN_PASSWPRD')
           echo "mvnpass: $mvn_password"
-          sed -i 's/MVN_USERNAME/'"$mvn_username"'/' .github/workflows/settings.xml
-          sed -i 's/MVN_PASSWORD/'"$mvn_password"'/' .github/workflows/settings.xml
+          sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
+          sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
