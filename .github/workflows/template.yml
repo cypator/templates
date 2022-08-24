@@ -51,7 +51,9 @@ jobs:
           fi
       - name: Converting vuser and pass values in settings.xml file
         run: | 
-          sed -i 's/MVN_USERNAME/$MVN_USERNAME_MVN_USERNAME/' .github/workflows/settings.xml
+          mvn=$(echo ${MVN_USERNAME_MVN_USERNAME})
+          echo "mvnuser: $mvn"
+          sed -i 's/MVN_USERNAME/$(echo ${MVN_USERNAME_MVN_USERNAME})/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/$MVN_PASSWORD_MVN_PASSWORD/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
         run: cat .github/workflows/settings.xml
