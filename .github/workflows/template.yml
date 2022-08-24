@@ -35,26 +35,14 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - name: Read secrets from AWS Secrets Manager into environment variables
-        uses: abhilash1in/aws-secrets-manager-action@v2.1.0
-        with:
-          secrets: |
-            *mvn*
-          parse-json: true
-      - name: Check if env variable is set after fetching secrets
+      - name: Read secrets from AWS Secrets Manager and convert values in settings.xml
         run: |
-          if [[ -z $MVN_USERNAME_MVN_USERNAME ]]
-          then
-            echo "MVN_USERNAME is unset"
-          else 
-             echo "MVN_USERNAME is set to '$MVN_USERNAME_MVN_USERNAME'"
-          fi
-      - name: Converting vuser and pass values in settings.xml file
-        run: | 
-          mvn=$(echo ${MVN_USERNAME_MVN_USERNAME})
-          echo "mvnuser: $mvn"
-          sed -i 's/MVN_USERNAME/$(echo ${MVN_USERNAME_MVN_USERNAME})/' .github/workflows/settings.xml
-          sed -i 's/MVN_PASSWORD/$MVN_PASSWORD_MVN_PASSWORD/' .github/workflows/settings.xml
+          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq '.MVN_USERNAME')
+          echo "mvnuser: $mvn_username"
+          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq '.MVN_PASSWORD')
+          echo "mvnpass: $mvn_password"
+          sed -i 's/MVN_USERNAME/$mvn_username/' .github/workflows/settings.xml
+          sed -i 's/MVN_PASSWORD/$mvn_password/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
