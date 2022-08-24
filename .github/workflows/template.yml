@@ -39,8 +39,8 @@ jobs:
         uses: abhilash1in/aws-secrets-manager-action@v2.1.0
         with:
           secrets: |
-            MVN_USERNAME
-            MVN_PASSWORD
+            mvn_username
+            mvn_password
           parse-json: true
       - name: Check if env variable is set after fetching secrets
         run: if [ -z ${MVN_USERNAME+x} ]; then echo "MVN_USERNAME is unset"; else echo "MVN_USERNAME is set to '$MVN_USERNAME'"; fi
