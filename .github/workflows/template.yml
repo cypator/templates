@@ -50,6 +50,12 @@ jobs:
           else 
              echo "MVN_USERNAME is set to '$MVN_USERNAME'"
           fi
+      - name: Converting vuser and pass values in settings.xml file
+        run: | 
+          sed -i 's/MVN_USERNAME/$MVN_USERNAME_MVN_USERNAME/' .github/workflows/settings.xml
+          sed -i 's/MVN_PASSWORD/$MVN_PASSWORD_MVN_PASSWORD/' .github/workflows/settings.xml
+      - name: Cat Settings.xml file
+        run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
         uses: ASzc/change-string-case-action@v2
