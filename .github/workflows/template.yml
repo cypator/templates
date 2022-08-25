@@ -40,6 +40,7 @@ jobs:
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
           mvn_pass=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq '.MVN_PASSWORD')
+          echo "mvnpass: $mvn_password"
           mvn_password=$(echo "$mvn_pass" | base64 -d)
           echo "mvnpass: $mvn_password"
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
