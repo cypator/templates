@@ -36,6 +36,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Read secrets from AWS Secrets Manager and convert values in settings.xml
+        if: ${{ inputs.service_name != 'data-agent' || inputs.service_name != 'prisma' }}
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
