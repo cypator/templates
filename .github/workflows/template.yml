@@ -37,9 +37,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
       - name: Read secrets from AWS Secrets Manager and convert values in settings.xml
         run: |
-          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq '.MVN_USERNAME')
+          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
-          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq '.MVN_PASSWORD')
+          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r '.MVN_PASSWORD')
           echo "mvnpass: $mvn_password"
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
