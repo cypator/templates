@@ -45,6 +45,7 @@ jobs:
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
+        if: ${{ inputs.service_name != 'data-agent'}}
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
