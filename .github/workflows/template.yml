@@ -83,6 +83,7 @@ jobs:
              echo "there are no arguments in docker file"
              if [[ $docker_folder == 'data-agent' ]]
              then
+               echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
                 command="docker build -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
