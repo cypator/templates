@@ -83,7 +83,7 @@ jobs:
              echo "there are no arguments in docker file"
              if [[ $docker_folder == 'data-agent' ]]
              then
-               command="docker build -t $Docker_image . --progress=plain"
+               command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
                 command="docker build -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
            fi
