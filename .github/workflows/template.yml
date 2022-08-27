@@ -71,7 +71,6 @@ jobs:
           echo "Docker_image: $Docker_image"
           docker_folder=$(echo ${{ inputs.service_name }})
           echo "Service: $docker_folder"
-          echo "GITHUB_WORKSPACE1: $GITHUB_WORKSPACE"
           arguments=$(echo ${{ inputs.docker_arguments }})
           echo "Arguments: $arguments"
           if [[ ! -z $arguments ]]
@@ -81,10 +80,10 @@ jobs:
             echo "Arguments: $arguments"
             command="docker build -t $Docker_image -f $docker_folder/Dockerfile --build-arg $arguments . "
           else
+             echo "GITHUB_WORKSPACE1: $GITHUB_WORKSPACE"
              echo "there are no arguments in docker file"
              if [[ $docker_folder == 'data-agent' ]]
              then
-               echo "GITHUB_WORKSPACE1: $GITHUB_WORKSPACE"
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
                 echo "GITHUB_WORKSPACE2: $GITHUB_WORKSPACE"
