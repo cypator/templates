@@ -20,8 +20,6 @@ on:
 jobs:
   docker-build:
     runs-on: ubuntu-20.04
-    env:
-      ServiceName: ${{ inputs.service_name }}
     timeout-minutes: 45
     steps:
       - name: Checkout
@@ -38,7 +36,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Read secrets from AWS Secrets Manager and convert values in settings.xml
-        if: ${{ ServiceName != 'data-agent' }}
+        if: ${{ inputs.service_name != 'data-agent'}}
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
