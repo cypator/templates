@@ -89,6 +89,7 @@ jobs:
              else
                 echo "GITHUB_WORKSPACE2: $GITHUB_WORKSPACE"
                 command="docker build -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
+             fi
            fi
           echo "check"
           echo "$command"
