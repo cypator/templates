@@ -87,6 +87,7 @@ jobs:
         if: ${{ steps.hash-tag-exist.outputs.tag_exist == 'false' }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          TAG_LIST: "${{ github.run_id }},${{ github.sha }},${{ env.BRANCH_NAME }}"
           IMAGE_TAG: ${{ steps.service-hashes.outputs.image_hash }}
         run: |
           repo_name=$(echo ${{ steps.string.outputs.lowercase }})
@@ -114,3 +115,23 @@ jobs:
           echo "$command"
           $command
           docker push $Docker_image
+      - name: Retag
+        env:
+          HASH_TAG_EXIST: ${{ steps.hash-tag-exist.outputs.tag_exist }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          TAG_LIST_SHORT: "${{ env.BRANCH_NAME }}"
+          TAG_LIST_FULL: "${{ env.BRANCH_NAME }},${{ github.run_id }}"
+          ECR_REPOSITORY: "${{ steps.string.outputs.lowercase }}"
+        run: |
+          if [[ "$HASH_TAG_EXIST" == 'true' ]]
+          then
+            echo "tag already exist"
+            export TAG_LIST=$TAG_LIST_SHORT
+          else
+            echo "tag doesn't exist"
+            export TAG_LIST=$TAG_LIST_FULL
+          fi
+          echo $TAG_LIST
+          export MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
+          echo "MANIFEST: $MANIFEST"
+          sh .github/workflows/scripts/ecr_retag.sh
