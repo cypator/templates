@@ -62,7 +62,8 @@ jobs:
       - name: get services hash
         id: service-hashes
         run: |
-          hash=find ${{ inputs.service_name }} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1
+          hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
+          hash=find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1
           echo "hash of alerting is: $hash"
       - name: printing build id
         run: echo ${{github.run_number}}
