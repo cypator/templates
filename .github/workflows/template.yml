@@ -65,8 +65,24 @@ jobs:
           hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
           hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
           echo "hash of alerting is: $hash"
+          echo "::set-output name=image_hash::$hash"
       - name: printing build id
         run: echo ${{github.run_number}}
+      - name: set branch-name
+        run: echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
+      - name: Check if image hash tag is already exist in ECR image repository
+        id: hash-tag-exist
+        run: |
+          set +e
+          cmd="$(aws ecr describe-images --repository-name=${{ steps.string.outputs.lowercase }} --image-ids=imageTag=${{ steps.service-hashes.outputs.image_hash }})"
+          if [[ ! -z "$cmd" ]]
+          then
+            echo "tag already exist"
+            echo "::set-output name=tag_exist::true"
+          else
+             echo "tag doesn't exist"
+             echo "::set-output name=tag_exist::false"
+           fi
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
