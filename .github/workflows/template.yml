@@ -116,7 +116,7 @@ jobs:
             echo "there are arguments"
             arguments=${{ steps.docker-args.outputs.args }}
             echo "Arguments: $arguments"
-            command="docker build -t $Docker_image -f $docker_folder/Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
+            command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
           else
              echo "there are no arguments in docker file"
              if [[ $docker_folder == 'data-agent' ]]
