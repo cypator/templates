@@ -63,7 +63,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[ $service != 'data-agent' || $service != 'backoffice' ]]
+          if [[ $service != 'data-agent' && $service != 'backoffice' ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
