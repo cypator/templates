@@ -35,8 +35,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - name: Read secrets from AWS Secrets Manager and convert values in settings.xml
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' }} 
+      - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
+        if: ${{ inputs.service_name != 'data-agent' || inputs.service_name != 'prisma' || inputs.service_name != 'backoffice' }} 
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
@@ -45,7 +45,7 @@ jobs:
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' }}
+        if: ${{ inputs.service_name != 'data-agent' || inputs.service_name != 'prisma' || inputs.service_name != 'backoffice' }}
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
@@ -62,12 +62,19 @@ jobs:
       - name: get services hash
         id: service-hashes
         run: |
-          hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
-          hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
-          echo "hash of alerting is: $hash"
-          echo "::set-output name=image_hash::$hash"
-      - name: printing build id
-        run: echo ${{github.run_id}}
+          service=$(echo ${{ inputs.service_name }})
+          if [[ $service != 'data-agent' || $service != 'backoffice' ]]
+          then
+            hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
+            hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+            echo "hash of alerting is: $hash"
+            echo "::set-output name=image_hash::$hash"             
+          else
+             hashPath=$GITHUB_WORKSPACE
+             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+             echo "hash of alerting is: $hash"
+             echo "::set-output name=image_hash::$hash"  
+           fi
       - name: set branch-name
         run: echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
       - name: Check if image hash tag is already exist in ECR image repository
@@ -83,11 +90,18 @@ jobs:
              echo "tag doesn't exist"
              echo "::set-output name=tag_exist::false"
            fi
+      - name: Read secrets for args docker file
+        id: docker-args
+        if: ${{ inputs.service_name == 'backoffice' }} 
+        run: |
+          args=$(aws secretsmanager get-secret-value --secret-id PACKAGES_REPO_TOKEN --region us-east-1 --query SecretString --output text | jq -r '.PACKAGES_REPO_TOKEN')
+          echo "args: $args"
+          echo "::set-output name=args::$args"  
       - name: Build, tag, and push image to Amazon ECR
         if: ${{ steps.hash-tag-exist.outputs.tag_exist == 'false' }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          TAG_LIST: "${{ github.run_id }},${{ github.sha }},${{ env.BRANCH_NAME }}"
+          TAG_LIST: "${{github.run_number}},${{ github.sha }},${{ env.BRANCH_NAME }}"
           IMAGE_TAG: ${{ steps.service-hashes.outputs.image_hash }}
         run: |
           repo_name=$(echo ${{ steps.string.outputs.lowercase }})
@@ -100,9 +114,9 @@ jobs:
           if [[ ! -z $arguments ]]
           then
             echo "there are arguments"
-            arguments=$(echo ${{ inputs.docker_arguments }})
+            arguments=${{ steps.docker-args.outputs.args }}
             echo "Arguments: $arguments"
-            command="docker build -t $Docker_image -f $docker_folder/Dockerfile --build-arg $arguments . "
+            command="docker build -t $Docker_image -f $docker_folder/Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
           else
              echo "there are no arguments in docker file"
              if [[ $docker_folder == 'data-agent' ]]
@@ -120,7 +134,7 @@ jobs:
           HASH_TAG_EXIST: ${{ steps.hash-tag-exist.outputs.tag_exist }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           TAG_LIST_SHORT: "${{ env.BRANCH_NAME }}"
-          TAG_LIST_FULL: "${{ env.BRANCH_NAME }},${{ github.run_id }}"
+          TAG_LIST_FULL: "${{ env.BRANCH_NAME }},${{github.run_number}}"
           ECR_REPOSITORY: "${{ steps.string.outputs.lowercase }}"
         run: |
           if [[ "$HASH_TAG_EXIST" == 'true' ]]
