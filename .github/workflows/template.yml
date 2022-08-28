@@ -62,10 +62,8 @@ jobs:
       - name: get services hash
         id: service-hashes
         run: |
-          echo "SERVICE_NAME=$(echo ${{ inputs.service_name }})" >> $GITHUB_ENV
-          echo "service name: ${{ env.SERVICE_NAME }}"
-          hash=find ${{ env.SERVICE_NAME }} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1
-          echo "hash of alerting is: $sha"
+          hash=find ${{ inputs.service_name }} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1
+          echo "hash of alerting is: $hash"
       - name: printing build id
         run: echo ${{github.run_number}}
       - name: Build, tag, and push image to Amazon ECR
