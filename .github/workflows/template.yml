@@ -63,8 +63,8 @@ jobs:
         id: service-hashes
         run: |
           echo "SERVICE_NAME=$(echo ${{ inputs.service_name }})" >> $GITHUB_ENV
-          echo "service name: ${{ env.BRANCH_NAME }}"
-          hash=find ${env.SERVICE_NAME} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1
+          echo "service name: ${{ env.SERVICE_NAME }}"
+          hash=find ${{ env.SERVICE_NAME }} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1
           echo "hash of alerting is: $sha"
       - name: printing build id
         run: echo ${{github.run_number}}
