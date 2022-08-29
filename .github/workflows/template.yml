@@ -36,7 +36,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' }} 
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading_webserver' }} 
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
@@ -45,7 +45,7 @@ jobs:
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' }}
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading_webserver' }}
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
@@ -63,7 +63,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[ $service != 'data-agent' && $service != 'backoffice' ]]
+          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading_webserver' ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
@@ -92,7 +92,7 @@ jobs:
            fi
       - name: Read secrets for args docker file
         id: docker-args
-        if: ${{ inputs.service_name == 'backoffice' }} 
+        if: ${{ inputs.service_name == 'backoffice' && inputs.service_name == 'trading_webserver' }} 
         run: |
           args=$(aws secretsmanager get-secret-value --secret-id PACKAGES_REPO_TOKEN --region us-east-1 --query SecretString --output text | jq -r '.PACKAGES_REPO_TOKEN')
           echo "args: $args"
