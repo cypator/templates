@@ -92,7 +92,7 @@ jobs:
            fi
       - name: Read secrets for args docker file
         id: docker-args
-        if: ${{ inputs.service_name == 'backoffice' && inputs.service_name == 'trading_webserver' }} 
+        if: ${{ inputs.service_name == 'backoffice' || inputs.service_name == 'trading_webserver' }} 
         run: |
           args=$(aws secretsmanager get-secret-value --secret-id PACKAGES_REPO_TOKEN --region us-east-1 --query SecretString --output text | jq -r '.PACKAGES_REPO_TOKEN')
           echo "args: $args"
