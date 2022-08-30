@@ -66,11 +66,13 @@ jobs:
           if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading_webserver' && $service != 'trading_nextjs' ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
+            echo "hash path: $hashPath"
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
             echo "hash of alerting (if) is: $hash"
             echo "::set-output name=image_hash::$hash"             
           else
              hashPath=$GITHUB_WORKSPACE
+             echo "hash path: $hashPath"
              hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
              echo "hash of service (else) is: $hash"
              echo "::set-output name=image_hash::$hash"  
