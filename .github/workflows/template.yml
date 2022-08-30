@@ -122,7 +122,7 @@ jobs:
             echo "Arguments: $arguments"
             if [[ $docker_folder == 'trading_nextjs' ]]
             then
-              command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments --build-arg BACKEND_SERVICE_URL=trading-webserver.cypator-services.svc.cluster.local . "
+              command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments --build-arg BACKEND_SERVICE_URL=https://backend.dev.cypator.net . "
             else
                command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
             fi
