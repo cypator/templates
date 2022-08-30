@@ -67,12 +67,12 @@ jobs:
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
-            echo "hash of alerting is: $hash"
+            echo "hash of alerting (if) is: $hash"
             echo "::set-output name=image_hash::$hash"             
           else
              hashPath=$GITHUB_WORKSPACE
              hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
-             echo "hash of alerting is: $hash"
+             echo "hash of service (else) is: $hash"
              echo "::set-output name=image_hash::$hash"  
            fi
       - name: set branch-name
