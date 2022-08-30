@@ -40,8 +40,6 @@ jobs:
       - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
         if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading_webserver' && inputs.service_name != 'trading_nextjs' }} 
         run: |
-          cat $GITHUB_WORKSPACE/AlertingTransciever/src/main/java/com/cypator/alertingservices/AlertClient.java
-          echo ${GITHUB_REF##*/}
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
           mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r '.MVN_PASSWORD')
@@ -72,7 +70,7 @@ jobs:
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
-            echo "hash of alerting (if) is: $hash"
+            echo "hash of service (if) is: $hash"
             echo "::set-output name=image_hash::$hash"             
           else
              hashPath=$GITHUB_WORKSPACE
