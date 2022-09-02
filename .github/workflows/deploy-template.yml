@@ -37,7 +37,7 @@ jobs:
         with:
           repository: cypator/devops
           token: ${{ secrets.helm-repo-access-key }}
-          path: infrastructure-helm
+          path: helm
           fetch-depth: 0
           ref: main
       # - uses: actions/checkout@v2
