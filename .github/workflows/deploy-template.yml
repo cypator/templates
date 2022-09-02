@@ -1,5 +1,13 @@
 name: Deploy
 on:
+  workflow_call:
+    secrets:
+      aws-access-key-id:
+        description: "access key id for ecr"
+        required: true
+      aws-secret-access-key:
+        description: "secret access key for ecr"
+        required: true
   workflow_dispatch:
     inputs:
       target-env:
@@ -9,14 +17,6 @@ on:
         required: true
         options:
           - develop
-    secrets:
-      aws-access-key-id:
-        description: "access key id for ecr"
-        required: true
-      aws-secret-access-key:
-        description: "secret access key for ecr"
-        required: true
-
       confirm-env:
         type: string
         description: Confirm the environment to deploy
