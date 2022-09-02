@@ -32,9 +32,17 @@ jobs:
     outputs:
       valid_image: ${{ steps.check-image.outputs.image_exist }}
     steps:
-      - uses: actions/checkout@v2
+      - name: cloning to helm repo
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          repository: cypator/devops
+          token: ${{ secrets.helm-repo-access-key }}
+          path: infrastructure-helm
+          fetch-depth: 0
+          ref: main
+      # - uses: actions/checkout@v2
+      #   with:
+      #     fetch-depth: 1
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -44,10 +52,7 @@ jobs:
       - name: set branch-name
         run: |
           echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
-      - uses: actions/checkout@v1  
-        with:
-          repository: cypator/devops
-          token: ${{ secrets.helm-repo-access-key }}
+
       # - name: check if image exists for the branch name
       #   id: check-image
       #   run: |
