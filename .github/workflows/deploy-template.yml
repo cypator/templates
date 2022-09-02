@@ -8,10 +8,24 @@ on:
       aws-secret-access-key:
         description: "secret access key for ecr"
         required: true
-
+  workflow_dispatch:
+    inputs:
+      target-env:
+        type: choice
+        description: Environment to deploy to
+        default: develop
+        required: true
+        options:
+          - develop
+      confirm-env:
+        type: string
+        description: Confirm the environment to deploy
+        required: true
+        default: develop
 jobs:
   validate-image:
     runs-on: ubuntu-20.04
+    if: github.event.inputs.target-env == github.event.inputs.confirm-env
     outputs:
       valid_image: ${{ steps.check-image.outputs.image_exist }}
     steps:
