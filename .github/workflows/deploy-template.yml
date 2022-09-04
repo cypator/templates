@@ -38,13 +38,10 @@ jobs:
           owner: 'cypator'
           repository: 'devops'
           access-token: ${{ secrets.helm-repo-access-key }}
+          fetch-depth: 1
       - name: Access cloned repository content
         run: |
-          pwd
           cd devops
-          pwd
-          ls -la
-          cd services
           ls -la
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
