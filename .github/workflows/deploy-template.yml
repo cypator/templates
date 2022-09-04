@@ -55,9 +55,6 @@ jobs:
       - name: set branch-name
         run: |
           echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: check if image exists for the branch name
         id: check-image
         run: |
