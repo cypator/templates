@@ -161,3 +161,18 @@ jobs:
           sh .github/workflows/scripts/ecr_retag.sh
       - name: printing github sha
         run: echo ${{ github.sha }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          repository: 'cypator/devops'
+          path: devops
+          token: ${{ secrets.helm-repo-access-key }}
+          ref: feature/changingServiceName
+      - name: check if image exists for the branch name
+        id: check-image
+        run: |
+          sh .github/workflows/scripts/deploy-image.sh
+          pwd
+          ls -la
+          cd devops
+          ls -la
