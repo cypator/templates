@@ -32,7 +32,7 @@ jobs:
     outputs:
       valid_image: ${{ steps.check-image.outputs.image_exist }}
     steps:
-      - name: Clone GuillaumeFalourd/formulas-training PRIVATE repository
+      - name: Clone devops PRIVATE repository
         uses: GuillaumeFalourd/clone-github-repo-action@v2
         with:
           owner: 'cypator'
@@ -40,6 +40,7 @@ jobs:
           access-token: ${{ secrets.helm-repo-access-key }}
       - name: Access cloned repository content
         run: |
+          pwd
           cd devops
           ls -LR
       - name: Configure AWS credentials
