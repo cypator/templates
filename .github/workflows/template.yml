@@ -159,5 +159,5 @@ jobs:
           echo "MANIFEST: $MANIFEST"
           # chmod +x "${GITHUB_WORKSPACE}/.github/workflows/scripts/ecr_retag.sh"
           sh .github/workflows/scripts/ecr_retag.sh
-    - name: printing github sha
-      run: echo ${{ github.sha }}
+      - name: printing github sha
+        run: echo ${{ github.sha }}
