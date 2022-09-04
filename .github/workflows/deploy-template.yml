@@ -38,9 +38,9 @@ jobs:
           owner: 'cypator'
           repository: 'devops'
           access-token: ${{ secrets.helm-repo-access-key }}
-          fetch-depth: 1
       - name: Access cloned repository content
         run: |
+          pwd
           cd devops
           ls -la
       - name: Configure AWS credentials
@@ -52,7 +52,14 @@ jobs:
       - name: set branch-name
         run: |
           echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
       - name: check if image exists for the branch name
         id: check-image
         run: |
+          pwd
+          ls -la
+          cd devops
+          ls -la
           sh .github/workflows/scripts/deploy-image.sh
