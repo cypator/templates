@@ -55,4 +55,5 @@ jobs:
       - name: check if image exists for the branch name
         id: check-image
         run: |
+          chmod +x "${GITHUB_WORKSPACE}/.github/workflows/scripts/deploy-image.sh"
           sh .github/workflows/scripts/deploy-image.sh
