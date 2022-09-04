@@ -1,7 +1,7 @@
 #!/bin/bash
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 echo "script dir: $SCRIPT_DIR "
-ROOT_FOLDER=${GITHUB_WORKSPACE:=$SCRIPT_DIR/helm}
+ROOT_FOLDER=${GITHUB_WORKSPACE:=$SCRIPT_DIR/devops}
 echo "root folder: $ROOT_FOLDER "
 HELM_SERVICES_FOLDER="$ROOT_FOLDER/services"
 echo "services folder: $HELM_SERVICES_FOLDER "
