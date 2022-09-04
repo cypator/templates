@@ -35,7 +35,7 @@ jobs:
       - name: Clone GuillaumeFalourd/formulas-training PRIVATE repository
         uses: GuillaumeFalourd/clone-github-repo-action@v2
         with:
-          owner: 'GuillaumeFalourd'
+          owner: 'cypator'
           repository: 'devops'
           access-token: ${{ secrets.helm-repo-access-key }}
       - name: Access cloned repository content
