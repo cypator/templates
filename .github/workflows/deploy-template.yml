@@ -68,8 +68,8 @@ jobs:
       - name: check if image exists for the branch name
         id: check-image
         run: |
+          sh .github/workflows/scripts/deploy-image.sh
           pwd
           ls -la
-          cd .github/workflows/scripts
+          cd devops
           ls -la
-          sh ./.github/workflows/scripts/deploy-image.sh
