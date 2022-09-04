@@ -42,6 +42,9 @@ jobs:
         run: |
           pwd
           cd devops
+          pwd
+          ls -la
+          cd services
           ls -la
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
