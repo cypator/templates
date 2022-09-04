@@ -35,7 +35,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
           repository: 'cypator/devops'
+          path: devops
           token: ${{ secrets.helm-repo-access-key }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -64,4 +68,8 @@ jobs:
       - name: check if image exists for the branch name
         id: check-image
         run: |
-          sh .github/workflows/scripts/deploy-image.sh
+          pwd
+          ls -la
+          cd .github/workflows/scripts
+          ls -la
+          sh ./.github/workflows/scripts/deploy-image.sh
