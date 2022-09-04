@@ -32,17 +32,25 @@ jobs:
     outputs:
       valid_image: ${{ steps.check-image.outputs.image_exist }}
     steps:
-      - name: cloning to helm repo
-        uses: actions/checkout@v3
+      - name: Clone GuillaumeFalourd/formulas-training PRIVATE repository
+        uses: GuillaumeFalourd/clone-github-repo-action@v2
         with:
-          repository: cypator/devops
-          token: ${{ secrets.helm-repo-access-key }}
-          path: helm
-          fetch-depth: 0
-          ref: main
-      # - uses: actions/checkout@v2
+          owner: 'GuillaumeFalourd'
+          repository: 'devops'
+          access-token: ${{ secrets.helm-repo-access-key }}
+      - name: Access cloned repository content
+        run: |
+          cd devops
+          ls -LR
+      # - name: cloning to helm repo
+      #   uses: actions/checkout@v3
       #   with:
-      #     fetch-depth: 1
+      #     repository: cypator/devops
+      #     token: ${{ secrets.helm-repo-access-key }}
+      #     path: helm
+      #     fetch-depth: 0
+      #     ref: main
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
