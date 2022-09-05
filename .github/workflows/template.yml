@@ -181,7 +181,6 @@ jobs:
           pwd
           cd values
           ls -la 
-           - name: zip
       - name: creating zip values.yaml
         uses: montudor/action-zip@v0.1.0
         with:
