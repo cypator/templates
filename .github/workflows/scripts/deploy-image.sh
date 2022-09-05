@@ -53,6 +53,8 @@ do
         done <<< "$image_tags"
     fi
 done
+pwd
+ls -la
 cat ./services-image-tags.yaml
 # echo "$VERSIONS" >> $OUTPUT_PATH
 # echo "VERSIONS=$VERSIONS" >> $GITHUB_ENV
