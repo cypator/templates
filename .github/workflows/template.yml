@@ -183,11 +183,16 @@ jobs:
       - name: creating zip file of values.yaml
         uses: vimtor/action-zip@v1
         with:
-          files: $GITHUB_WORKSPACE/services-image-tags.yaml
+          files: ${{ github.workspace }}/services-image-tags.yaml
           dest: ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
       - name: checking if zip file exist
         run: |
           pwd
           ls -la
+      - name: public zip file as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
 
 
