@@ -44,9 +44,9 @@ do
             echo "checking tag: $line" 
             if [[ $line =~ $re ]] ; then
             printf "
-            $SERVICE_NAME:
-              image:
-                tag: '$line'" >> ./services-image-tags.yaml
+$SERVICE_NAME:
+    image:
+    tag: '$line'" >> ./services-image-tags.yaml
             echo "using: $line"
             break;
             fi
