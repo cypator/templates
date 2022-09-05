@@ -46,7 +46,7 @@ do
             printf "
 $SERVICE_NAME:
     image:
-    tag: '$line'" >> ./services-image-tags.yaml
+      tag: '$line'" >> ./services-image-tags.yaml
             echo "using: $line"
             break;
             fi
