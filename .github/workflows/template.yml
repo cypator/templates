@@ -181,7 +181,7 @@ jobs:
           pwd
           ls -la 
       - name: creating zip file of values.yaml
-      - uses: vimtor/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: $GITHUB_WORKSPACE/ services-image-tags.yaml
           dest: ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
