@@ -177,5 +177,5 @@ jobs:
       - name: check if image exists for the branch name
         id: check-image
         run: |
-          sh .github/workflows/scripts/deploy-image.sh
+          bash .github/workflows/scripts/deploy-image.sh
 
