@@ -22,10 +22,10 @@ do
     REPO_NAME="$SERVICE_NAME"
     echo "SERVICE_NAME: $SERVICE_NAME"
     echo "REPO_NAME: $REPO_NAME"
-    # tag_list="$(aws ecr describe-images --repository-name=$REPO_NAME --region us-east-1 --image-ids=imageTag=$IMAGE_TAG_ANCHOR 2> /dev/null )"
-    # image_tags=$(echo $tag_list | jq -r '.imageDetails[0].imageTags' 2>&1)
-    # echo "tag_list: $tag_list"
-    # echo "image_tags: $image_tags"
+    tag_list="$(aws ecr describe-images --repository-name=$REPO_NAME --region us-east-1 --image-ids=imageTag=$IMAGE_TAG_ANCHOR 2> /dev/null )"
+    image_tags=$(echo $tag_list | jq -r '.imageDetails[0].imageTags' 2>&1)
+    echo "tag_list: $tag_list"
+    echo "image_tags: $image_tags"
     
     # echo ""  > found_tag
     # while IFS= read -r line; do
