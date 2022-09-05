@@ -34,6 +34,22 @@ do
       echo "tag_list: $tag_list"
       echo "image_tags: $image_tags"      
     fi
+
+    echo ""  > found_tag
+    if [[ $SERVICE_NAME != 'kafka-ui' ]]
+    then
+        while IFS= read -r line; do
+            re='^[0-9]+$'
+            line=$(echo "$line" | tr -d '"' | sed 's/,*$//' | xargs)
+            echo "checking tag: $line" 
+            if [[ $line =~ $re ]] ; then
+            echo "$line" > found_tag
+            echo "using: $line"
+            break;
+            fi
+        done <<< "$image_tags"
+    fi
+    echo "found tag is: $found_tag "
     
 done
 # echo "$VERSIONS" >> $OUTPUT_PATH
