@@ -181,15 +181,16 @@ jobs:
           pwd
           cd values
           ls -la 
-      - name: creating zip 1
-        uses: vimtor/action-zip@v1
+           - name: zip
+      - name: creating zip values.yaml
+        uses: montudor/action-zip@v0.1.0
         with:
-          files: ${{ github.workspace }}/values/ services-image-tags.yaml
-          dest: ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
-      - name: creating zip file of values.yaml
-        uses: montudor/action-zip@v1 
-        with:
-          args: zip -qq -r ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ${{ github.workspace }}/values/
+          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ./values/."
+      # - name: creating zip 1
+      #   uses: vimtor/action-zip@v1
+      #   with:
+      #     files: ${{ github.workspace }}/values/ services-image-tags.yaml
+      #     dest: ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
       - name: checking if zip file exist
         run: |
           pwd
