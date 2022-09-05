@@ -23,6 +23,8 @@ on:
 jobs:
   docker-build:
     runs-on: ubuntu-20.04
+    env:
+      git-sha: ${{ github.sha }}
     timeout-minutes: 45
     steps:
       - name: Checkout
@@ -163,7 +165,7 @@ jobs:
           # chmod +x "${GITHUB_WORKSPACE}/.github/workflows/scripts/ecr_retag.sh"
           sh .github/workflows/scripts/ecr_retag.sh
       - name: printing github sha
-        run: echo ${{ github.sha }}
+        run: echo $git-sha
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
