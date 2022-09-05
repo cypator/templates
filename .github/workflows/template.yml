@@ -184,7 +184,7 @@ jobs:
       - name: creating zip values.yaml
         uses: montudor/action-zip@v0.1.0
         with:
-          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ./values/."
+          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ./values"
       # - name: creating zip 1
       #   uses: vimtor/action-zip@v1
       #   with:
