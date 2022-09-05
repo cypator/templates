@@ -178,7 +178,4 @@ jobs:
         id: check-image
         run: |
           sh .github/workflows/scripts/deploy-image.sh
-          pwd
-          ls -la
-          cd devops
-          ls -la
+
