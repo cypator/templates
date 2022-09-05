@@ -11,8 +11,7 @@ HELM_SERVICES_FOLDER="$ROOT_FOLDER/devops/services"
 echo "helm_service_folder: $HELM_SERVICES_FOLDER"
 IMAGE_TAG_ANCHOR=${BRANCH_NAME:=master}
 echo "image_tag_anchor: $IMAGE_TAG_ANCHOR"
-touch $OUTPUT_PATH
-
+mkdir ./values
 
 
 for dir in /$HELM_SERVICES_FOLDER/*/
@@ -35,7 +34,6 @@ do
       echo "image_tags: $image_tags"      
     fi
 
-    echo ""  > found_tag
     if [[ $SERVICE_NAME != 'kafka-ui' ]]
     then
         while IFS= read -r line; do
@@ -46,7 +44,7 @@ do
             printf "
 $SERVICE_NAME:
     image:
-      tag: '$line'" >> ./services-image-tags.yaml
+      tag: '$line'" >> ./values/services-image-tags.yaml
             echo "using: $line"
             break;
             fi
