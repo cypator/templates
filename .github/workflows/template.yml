@@ -178,4 +178,9 @@ jobs:
         id: check-image
         run: |
           bash .github/workflows/scripts/deploy-image.sh
+      - uses: actions/checkout@v2
+      - uses: vimtor/action-zip@v1
+        with:
+          files: $GITHUB_WORKSPACE/services-image-tags.yaml
+          dest: ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
 
