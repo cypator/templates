@@ -43,7 +43,7 @@ do
             line=$(echo "$line" | tr -d '"' | sed 's/,*$//' | xargs)
             echo "checking tag: $line" 
             if [[ $line =~ $re ]] ; then
-            echo "$line" > found_tag
+            echo "$line" >> found_tag
             echo "using: $line"
             break;
             fi
