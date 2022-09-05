@@ -43,14 +43,16 @@ do
             line=$(echo "$line" | tr -d '"' | sed 's/,*$//' | xargs)
             echo "checking tag: $line" 
             if [[ $line =~ $re ]] ; then
-            echo "$line" >> found_tag
+            printf "
+            $SERVICE_NAME:
+              image:
+                tag: '$line'" >> ./services-image-tags.yaml
             echo "using: $line"
             break;
             fi
         done <<< "$image_tags"
     fi
-    echo "found tag is: $found_tag "
-    
 done
+cat ./services-image-tags.yaml
 # echo "$VERSIONS" >> $OUTPUT_PATH
 # echo "VERSIONS=$VERSIONS" >> $GITHUB_ENV
