@@ -183,4 +183,8 @@ jobs:
         with:
           files: $GITHUB_WORKSPACE/services-image-tags.yaml
           dest: ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
+      - name: checking if file zip is exist
+        run: |
+          pwd
+          ls -la
 
