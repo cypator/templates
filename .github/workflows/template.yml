@@ -183,7 +183,7 @@ jobs:
       - name: creating zip file of values.yaml
         uses: montudor/action-zip@v1 
         with:
-          args: zip -qq -r ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip $GITHUB_WORKSPACE/values
+          args: zip -qq -r ${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ${{ github.workspace }}/values
       - name: checking if zip file exist
         run: |
           pwd
