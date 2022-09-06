@@ -44,13 +44,12 @@ do
             printf "
 $SERVICE_NAME:
     image:
-      tag: '$line'" >> ./values/services-image-tags.yaml
+      tag: '$line'" >> ./devops/cypator/services-image-tags.yaml
             echo "using: $line"
             break;
             fi
         done <<< "$image_tags"
     fi
 done
-cat ./values/services-image-tags.yaml
-# echo "$VERSIONS" >> $OUTPUT_PATH
-# echo "VERSIONS=$VERSIONS" >> $GITHUB_ENV
+cat ./devops/cypator/services-image-tags.yaml
+
