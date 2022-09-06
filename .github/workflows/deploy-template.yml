@@ -34,8 +34,12 @@ jobs:
     steps:
       - name: download zip file artifact from s3
         run: |
-          command=$(aws s3 cp s3://cypatorbackend/*-feature-check-ci.zip deploy.zip)
+          command=$(aws s3 cp s3://cypatorbackend ./zips --recursive)
           echo "s3 command: $command"
+          pwd
+          ls -la
+          cd zips
+          ls -la
       - name: setup python
         uses: actions/setup-python@v2
         with:
