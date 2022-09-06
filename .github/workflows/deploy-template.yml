@@ -27,17 +27,9 @@ on:
         default: develop
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     if: github.event.inputs.target-env == github.event.inputs.confirm-env
     steps:
-      - name: download zip file artifact from s3
-        run: |
-          command=$(aws s3 cp s3://cypatorbackend ./zips --recursive)
-          echo "s3 command: $command"
-          pwd
-          ls -la
-          cd zips
-          ls -la
       - name: setup python
         uses: actions/setup-python@v2
         with:
@@ -49,6 +41,12 @@ jobs:
           aws-access-key-id: ${{ secrets.aws-access-key-id }}
           aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
           aws-region: us-east-1
+      - name: download zip file artifact from s3
+        run: |
+          command=$(aws s3 cp s3://cypatorbackend/*-feature-check-ci.zip deploy.zip)
+          echo "s3 command: $command"
+          pwd
+          ls -la
       - name: create secrets
         id: create-secrets
         run: |
