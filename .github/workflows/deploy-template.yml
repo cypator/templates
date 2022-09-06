@@ -32,6 +32,10 @@ jobs:
       TARGET_ENV: ${{ github.event.inputs.target-env }}
     if: github.event.inputs.target-env == github.event.inputs.confirm-env
     steps:
+      - name: download zip file artifact from s3
+        run: |
+          command=$(aws s3 cp s3://cypatorbackend/*-feature-check-ci.zip deploy.zip)
+          echo "s3 command: $command"
       - name: setup python
         uses: actions/setup-python@v2
         with:
