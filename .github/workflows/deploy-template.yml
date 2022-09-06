@@ -26,38 +26,35 @@ on:
         required: true
         default: develop
 jobs:
-  validate-image:
+  deploy:
     runs-on: ubuntu-20.04
+    env:
+      TARGET_ENV: ${{ github.event.inputs.target-env }}
     if: github.event.inputs.target-env == github.event.inputs.confirm-env
     steps:
-      - uses: actions/checkout@v3
+      - name: setup python
+        uses: actions/setup-python@v2
         with:
-          fetch-depth: 1
-      - name: Download a single artifact
-        uses: actions/download-artifact@v3
+          python-version: 3.8 #install the python needed
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          name: my-artifact
-      - name: check if artifact downloaded
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: us-east-1
+      - name: create secrets
+        id: create-secrets
         run: |
+          #download secret from AWS
+          echo "env: ${{ github.event.inputs.target-env }}"
+          SECRETS="secret-$TARGET_ENV.yaml"
+          secret_arn=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='deployment' && Value=='$TARGET_ENV']]" | jq -r '.[0].ARN')
+          echo $(aws secretsmanager get-secret-value --secret-id $secret_arn | jq -r '.SecretString') > $SECRETS_FILE_PATH
           pwd
           ls -la
-      # - uses: actions/checkout@v3
-      #   with:
-      #     fetch-depth: 1
-      #     repository: 'cypator/devops'
-      #     path: devops
-      #     token: ${{ secrets.helm-repo-access-key }}
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.aws-access-key-id }}
-      #     aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
-      #     aws-region: us-east-1
-      # - name: check if image exists for the branch name
-      #   id: check-image
-      #   run: |
-      #     sh .github/workflows/scripts/deploy-image.sh
-      #     pwd
-      #     ls -la
-      #     cd devops
-      #     ls -la
+          cat values-secrets-raw.json
+        env:
+          TARGET_ENV: ${{ github.event.inputs.target-env }}
+          SECRETS_FILE_PATH: ./values-secrets-raw.json
+   
