@@ -28,8 +28,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-20.04
-    env:
-      TARGET_ENV: ${{ github.event.inputs.target-env }}
     if: github.event.inputs.target-env == github.event.inputs.confirm-env
     steps:
       - name: download zip file artifact from s3
