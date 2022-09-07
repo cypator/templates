@@ -93,6 +93,8 @@ jobs:
           secret_arn=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='deployment' && Value=='$TARGET_ENV']]" | jq -r '.[0].ARN')
           echo $(aws secretsmanager get-secret-value --secret-id $secret_arn | jq -r '.SecretString') > $SECRETS_FILE_PATH
           python .github/workflows/scripts/secrets-creator.py
+          cd secrets
+          ls
         env:
           TARGET_ENV: develop
           SECRETS_FILE_PATH: ./values-secrets-raw.json
