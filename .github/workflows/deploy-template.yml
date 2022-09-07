@@ -95,6 +95,7 @@ jobs:
           python .github/workflows/scripts/secrets-creator.py
           cd secrets
           ls
+          kubectl apply -f . -n $TARGET_ENV
         env:
           TARGET_ENV: develop
           SECRETS_FILE_PATH: ./values-secrets-raw.json
