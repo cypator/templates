@@ -100,4 +100,10 @@ jobs:
           TARGET_ENV: develop
           SECRETS_FILE_PATH: ./values-secrets-raw.json
           SECRETS_TEMPLATE_FILE_PATH: .github/workflows/scripts/secret_template.yaml
-
+      - name: deploy app
+        id: deploy-app
+        run: |
+          helm dependency update
+          helm upgrade --install cypator ./helm/devops/cypator --create-namespace --namespace $TARGET_ENV --set global.domain=dev.cypator.net -f helm/devops/cypator/services-image-tags.yaml
+        env:
+          TARGET_ENV: develop
