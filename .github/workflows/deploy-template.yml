@@ -53,6 +53,8 @@ jobs:
         run: |
           pwd
           ls -la
+          cd helm/devops
+          ls -la
       - name: create secrets
         id: create-secrets
         run: |
@@ -67,4 +69,33 @@ jobs:
         env:
           TARGET_ENV: develop
           SECRETS_FILE_PATH: ./values-secrets-raw.json
+      - name: set namespace
+        id: set-namespace
+        run: |
+          NAMESPACE=$TARGET_ENV
+          echo "Will deploy to $NAMESPACE"
+          echo "NAMESPACE=$NAMESPACE" >> $GITHUB_ENV
+        env:
+          TARGET_ENV: develop
+      - name: set cluster name
+        id: set-cluster-name
+        run: |
+          CLUSTER_NAME="Cypator-dev"
+          if [ "$TARGET_ENV" = "prod" ]; then
+            CLUSTER_NAME="Cypator-$TARGET_ENV"
+          fi
+          echo "Will deploy to $CLUSTER_NAME eks cluster"
+          echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
+        env:
+          TARGET_ENV: develop
+      - name: create app yaml
+        id: create-namespace-yaml
+        run: |
+          cp $GITHUB_WORKSPACE/.github/workflows/deploy/namespace.yaml namespace.yaml
+          sed -i "s|NAMESPACE_PLACEHOLDER|$NAMESPACE|g" namespace.yaml
+          cat namespace.yaml
+          aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+          kubectl apply -f namespace.yaml
+        env:
+          AWS_REGION: us-east-1
    
