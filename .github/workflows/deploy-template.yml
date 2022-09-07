@@ -53,7 +53,7 @@ jobs:
         run: |
           pwd
           ls -la
-          cd helm/devops
+          cd helm/devops/cypator
           ls -la
       - name: set namespace
         id: set-namespace
@@ -104,6 +104,6 @@ jobs:
         id: deploy-app
         run: |
           helm dependency update
-          helm upgrade --install cypator ./helm/devops/cypator --create-namespace --namespace $TARGET_ENV --set global.domain=dev.cypator.net -f helm/devops/cypator/services-image-tags.yaml
+          helm upgrade --install cypator helm/devops/cypator --create-namespace --namespace $TARGET_ENV --set global.domain=dev.cypator.net -f helm/devops/cypator/services-image-tags.yaml
         env:
           TARGET_ENV: develop
