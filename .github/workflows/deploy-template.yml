@@ -49,18 +49,22 @@ jobs:
       - uses: montudor/action-zip@v1
         with:
           args: unzip -qq ./zips/*-feature-check-ci.zip -d helm
+      - name: see the path of unzip
+        run: |
+          pwd
+          ls -la
       - name: create secrets
         id: create-secrets
         run: |
           #download secret from AWS
           echo "env: $TARGET_ENV"
           SECRETS="secret-$TARGET_ENV.yaml"
-          secret_arn=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='deployment' && Value=='develop']]" | jq -r '.[0].ARN')
+          secret_arn=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='deployment' && Value=='$TARGET_ENV']]" | jq -r '.[0].ARN')
           echo $(aws secretsmanager get-secret-value --secret-id $secret_arn | jq -r '.SecretString') > $SECRETS_FILE_PATH
           pwd
           ls -la
           cat values-secrets-raw.json
         env:
-          TARGET_ENV: ${{ github.event.inputs.target-env }}
+          TARGET_ENV: develop
           SECRETS_FILE_PATH: ./values-secrets-raw.json
    
