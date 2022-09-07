@@ -55,20 +55,6 @@ jobs:
           ls -la
           cd helm/devops
           ls -la
-      - name: create secrets
-        id: create-secrets
-        run: |
-          #download secret from AWS
-          echo "env: $TARGET_ENV"
-          SECRETS="secret-$TARGET_ENV.yaml"
-          secret_arn=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='deployment' && Value=='$TARGET_ENV']]" | jq -r '.[0].ARN')
-          echo $(aws secretsmanager get-secret-value --secret-id $secret_arn | jq -r '.SecretString') > $SECRETS_FILE_PATH
-          pwd
-          ls -la
-          cat values-secrets-raw.json
-        env:
-          TARGET_ENV: develop
-          SECRETS_FILE_PATH: ./values-secrets-raw.json
       - name: set namespace
         id: set-namespace
         run: |
@@ -98,4 +84,17 @@ jobs:
           kubectl apply -f namespace.yaml
         env:
           AWS_REGION: us-east-1
+      - name: create secrets
+        id: create-secrets
+        run: |
+          #download secret from AWS
+          echo "env: $TARGET_ENV"
+          SECRETS="secret-$TARGET_ENV.yaml"
+          secret_arn=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='deployment' && Value=='$TARGET_ENV']]" | jq -r '.[0].ARN')
+          echo $(aws secretsmanager get-secret-value --secret-id $secret_arn | jq -r '.SecretString') > $SECRETS_FILE_PATH
+          python .github/workflows/scripts/secrets-creator.py
+        env:
+          TARGET_ENV: develop
+          SECRETS_FILE_PATH: ./values-secrets-raw.json
+          SECRETS_TEMPLATE_FILE_PATH: .github/workflows/scripts/secret_template.yaml
    
