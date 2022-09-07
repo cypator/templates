@@ -100,6 +100,11 @@ jobs:
           TARGET_ENV: develop
           SECRETS_FILE_PATH: ./values-secrets-raw.json
           SECRETS_TEMPLATE_FILE_PATH: .github/workflows/scripts/secret_template.yaml
+      - name: installing helm 
+        run: |
+          curl -O https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          bash ./get-helm-3
+          helm version
       - name: deploy app
         id: deploy-app
         run: |
