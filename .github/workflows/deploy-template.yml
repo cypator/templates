@@ -108,7 +108,8 @@ jobs:
       - name: deploy app
         id: deploy-app
         run: |
-          chmod -R 777 helm
+          sudo chmod -R 777 helm
+          ls -la
           cd helm/devops/cypator
           helm dependency update
           helm upgrade --install cypator . --create-namespace --namespace $TARGET_ENV --set global.domain=dev.cypator.net -f helm/devops/cypator/services-image-tags.yaml
