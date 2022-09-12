@@ -210,7 +210,7 @@ jobs:
           workflow_file_name: deploy.yml
           ref: feature/changingServiceName
           wait_interval: 10
-          client_payload: '{number:5}'
+          client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
 
 
 
