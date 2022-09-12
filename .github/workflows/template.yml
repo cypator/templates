@@ -198,13 +198,13 @@ jobs:
         with:
           name: my-artifact
           path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
-      - uses: convictional/trigger-workflow-and-wait@v1.3.0
-        with:
-          owner: cypator
-          repo: devops
-          github_token: ${{ secrets.helm-repo-access-key }}
-          workflow_file_name: deploy.yml
-          ref: feature/changingServiceName
+      # - uses: convictional/trigger-workflow-and-wait@v1.3.0
+      #   with:
+      #     owner: cypator
+      #     repo: devops
+      #     github_token: ${{ secrets.helm-repo-access-key }}
+      #     workflow_file_name: deploy.yml
+      #     ref: feature/changingServiceName
 
 
 
