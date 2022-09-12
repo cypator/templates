@@ -19,6 +19,9 @@ on:
       helm-repo-access-key:
         description: "clone into devops repo"
         required: true
+      github_token: 
+        description: "running workflow on devops repo"
+        required: true
 
 jobs:
   docker-build:
@@ -195,5 +198,17 @@ jobs:
         with:
           name: my-artifact
           path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
+
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+        owner: cypator
+        repo: devops
+        github_token: ${{ secrets.github_token }}
+        workflow_file_name: deploy.yml
+        ref: feature/changingServiceName
+
 
 
