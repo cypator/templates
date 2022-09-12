@@ -207,7 +207,7 @@ jobs:
         with:
         owner: cypator
         repo: devops
-        github_token: ${{ secrets.github_token }}
+        github_token: ${{ secrets.helm-repo-access-key }}
         workflow_file_name: deploy.yml
         ref: feature/changingServiceName
 
