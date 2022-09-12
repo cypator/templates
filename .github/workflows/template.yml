@@ -19,9 +19,6 @@ on:
       helm-repo-access-key:
         description: "clone into devops repo"
         required: true
-      github_token: 
-        description: "running workflow on devops repo"
-        required: true
 
 jobs:
   docker-build:
