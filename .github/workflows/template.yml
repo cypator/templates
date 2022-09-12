@@ -209,8 +209,8 @@ jobs:
           github_token: ${{ secrets.helm-repo-access-key }}
           workflow_file_name: deploy.yml
           ref: feature/changingServiceName
-          wait_interval: 60
-          #client_payload: '{}'
+          wait_interval: 10
+          client_payload: '{number:${{github.run_number}}, branch:${{ env.BRANCH_NAME }}}'
 
 
 
