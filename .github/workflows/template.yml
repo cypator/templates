@@ -202,6 +202,16 @@ jobs:
           github_token: ${{ secrets.helm-repo-access-key }}
           workflow_file_name: deploy.yml
           ref: feature/changingServiceName
+      - uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: cypator
+          repo: devops
+          github_token: ${{ secrets.helm-repo-access-key }}
+          workflow_file_name: deploy.yml
+          ref: feature/changingServiceName
+          wait_interval: 60
+          #client_payload: '{}'
+
 
 
 
