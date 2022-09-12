@@ -210,7 +210,7 @@ jobs:
           workflow_file_name: deploy.yml
           ref: feature/changingServiceName
           wait_interval: 10
-          client_payload: '{number:${{github.run_number}}, branch:${{ env.BRANCH_NAME }}}'
+          client_payload: '{number:5}'
 
 
 
