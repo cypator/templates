@@ -173,7 +173,7 @@ jobs:
           repository: 'cypator/devops'
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: feature/changingServiceName
+          ref: feature/cdPipeline
       - name: check if image exists for the branch name
         id: check-image
         run: |
@@ -203,7 +203,7 @@ jobs:
           repo: devops
           github_token: ${{ secrets.helm-repo-access-key }}
           workflow_file_name: deploy.yml
-          ref: feature/changingServiceName
+          ref: feature/cdPipeline
           wait_interval: 10
           client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}", "build_id": "${{github.run_number}}"}'
 
