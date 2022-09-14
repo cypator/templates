@@ -202,7 +202,7 @@ jobs:
         run: |
           echo "branch name: ${{ steps.branch-name.outputs.branch }}"
       - name: deploying app
-        if: ${{ env.BRANCH_NAME == 'feature/CiCdPipeline' }}
+        # if: ${{ env.BRANCH_NAME == 'feature/CiCdPipeline' }}
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
           owner: cypator
