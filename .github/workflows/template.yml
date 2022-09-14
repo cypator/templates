@@ -136,7 +136,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             if [[ $docker_folder == 'post_trade' ]]
+             if [[ $docker_folder == 'post_trade' && $docker_folder == 'data-agent' ]]
              then
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
@@ -176,7 +176,7 @@ jobs:
           repository: 'cypator/devops'
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: feature/cdPipeline
+          ref: develop
       - name: check if image exists for the branch name
         id: check-image
         run: |
@@ -209,7 +209,7 @@ jobs:
           repo: devops
           github_token: ${{ secrets.helm-repo-access-key }}
           workflow_file_name: deploy.yml
-          ref: feature/cdPipeline
+          ref: develop
           wait_interval: 10
           client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}", "build_id": "${{github.run_number}}"}'
 
