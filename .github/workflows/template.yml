@@ -196,7 +196,7 @@ jobs:
           name: my-artifact
           path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
       - name: deploying app
-        if: ${{ env.BRANCH_NAME == 'feature/CiCdPipeline' }}
+        # if: ${{ env.BRANCH_NAME == 'develop' }}
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
           owner: cypator
