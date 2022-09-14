@@ -70,7 +70,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading_webserver' && $service != 'trading_nextjs' ]]
+          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading_webserver' && $service != 'trading_nextjs' && $service != 'post-trade' ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
@@ -136,7 +136,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             if [[ $docker_folder == 'data-agent' ]]
+             if [[ $docker_folder == 'data-agent' || $docker_folder == 'post-trade']]
              then
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
@@ -202,7 +202,7 @@ jobs:
         run: |
           echo "branch name: ${{ steps.branch-name.outputs.branch }}"
       - name: deploying app
-        # if: ${{ steps.branch-name.outputs.branch == 'feature/CiCdPipeline' }}
+        if: ${{ env.BRANCH_NAME == 'feature/CiCdPipeline' }}
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
           owner: cypator
