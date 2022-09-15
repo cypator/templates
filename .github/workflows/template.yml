@@ -43,7 +43,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading_webserver' && inputs.service_name != 'trading_nextjs' }} 
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
@@ -52,7 +52,7 @@ jobs:
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading_webserver' && inputs.service_name != 'trading_nextjs' }}
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
@@ -70,7 +70,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading_webserver' && $service != 'trading_nextjs' && $service != 'post-trade' ]]
+          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
@@ -104,7 +104,7 @@ jobs:
            fi
       - name: Read secrets for args docker file
         id: docker-args
-        if: ${{ inputs.service_name == 'backoffice' || inputs.service_name == 'trading_webserver' || inputs.service_name == 'trading_nextjs'}} 
+        if: ${{ inputs.service_name == 'backoffice' || inputs.service_name == 'trading-webserver' || inputs.service_name == 'trading-nextjs'}} 
         run: |
           args=$(aws secretsmanager get-secret-value --secret-id PACKAGES_REPO_TOKEN --region us-east-1 --query SecretString --output text | jq -r '.PACKAGES_REPO_TOKEN')
           echo "args: $args"
@@ -128,7 +128,7 @@ jobs:
             echo "there are arguments"
             arguments=${{ steps.docker-args.outputs.args }}
             echo "Arguments: $arguments"
-            if [[ $docker_folder == 'trading_nextjs' ]]
+            if [[ $docker_folder == 'trading-nextjs' ]]
             then
               command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments --build-arg BACKEND_SERVICE_URL=https://backend.dev.cypator.net . "
             else
