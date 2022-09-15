@@ -181,7 +181,8 @@ jobs:
       - name: check if image exists for the branch name
         id: check-image
         run: |
-          bash .github/workflows/scripts/deploy-image.sh
+          ls
+          bash ./devops/scripts/deploy-image.sh
       - name: creating zip values.yaml
         uses: montudor/action-zip@v0.1.0
         with:
