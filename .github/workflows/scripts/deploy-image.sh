@@ -36,7 +36,7 @@ do
 
     if [[ $SERVICE_NAME != 'kafka-ui' ]]
     then
-        while IFS= read -r line; do
+        echo "$image_tags" | jq '.[]' | while read -r tag; do 
             re='^[0-9]+$'
             line=$(echo "$line" | tr -d '"' | sed 's/,*$//' | xargs)
             echo "checking tag: $line" 
@@ -48,8 +48,11 @@ $SERVICE_NAME:
             echo "using: $line"
             break;
             fi
-        done <<< "$image_tags"
+        done
     fi
 done
+
+echo "-----------------./devops/cypator/services-image-tags.yaml-----------------"
 cat ./devops/cypator/services-image-tags.yaml
+echo "---------------------------------------------------------------------------"
 
