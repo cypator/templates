@@ -4,15 +4,18 @@ echo "script_dir: $SCRIPT_DIR"
 TARGET_ENV=${TARGET_ENV:=dev}
 echo "target_env: $TARGET_ENV"
 OUTPUT_PATH=${OUTPUT_PATH:=versions.command}
+OUTPUT_PATH='.'
 echo "output_path: $OUTPUT_PATH"
 ROOT_FOLDER=${GITHUB_WORKSPACE:=$SCRIPT_DIR/devops}
 ROOT_FOLDER="/Users/iliagerman/Work/Sela/Clients/cypator"
+OUTPUT_FILE="$ROOT_FOLDER/devops/cypator/services-image-tags.yaml"
 echo "root_folder: $ROOT_FOLDER"
+echo "OUTPUT_FILE: $OUTPUT_FILE"
 HELM_SERVICES_FOLDER="$ROOT_FOLDER/devops/services"
 echo "helm_service_folder: $HELM_SERVICES_FOLDER"
-IMAGE_TAG_ANCHOR=${BRANCH_NAME:=master}
+IMAGE_TAG_ANCHOR=${BRANCH_NAME:=develop}
 echo "image_tag_anchor: $IMAGE_TAG_ANCHOR"
-mkdir ./values
+mkdir -p ./values
 
 
 for dir in /$HELM_SERVICES_FOLDER/*/
@@ -37,23 +40,21 @@ do
 
     if [[ "$SERVICE_NAME" != "kafka-ui" ]]
     then
-        echo "$image_tags" | jq '.[]' | while read -r tag; do 
+        echo "$image_tags" | jq '.' | while read -r tag; do 
             re='^[0-9]+$'
-            line=$(echo "$line" | tr -d '"' | sed 's/,*$//' | xargs)
-            echo "checking tag: $line" 
-            if [[ $line =~ $re ]] ; then
-            printf "
-$SERVICE_NAME:
-    image:
-      tag: '$line'" >> ./devops/cypator/services-image-tags.yaml
-            echo "using: $line"
-            break;
+            tag=$(echo "$tag" | tr -d '"' | sed 's/,*$//' | xargs)
+            echo "checking tag: $tag" 
+            if [[ $tag =~ $re ]] ; then
+                echo "$SERVICE_NAME:" >> $OUTPUT_FILE
+                echo "  image:" >> $OUTPUT_FILE
+                echo "    tag: $tag" >> $OUTPUT_FILE
+                break;
             fi
         done
     fi
 done
 
-echo "-----------------./devops/cypator/services-image-tags.yaml-----------------"
-cat ./devops/cypator/services-image-tags.yaml
+echo "-----------------$OUTPUT_FILE-----------------"
+cat $OUTPUT_FILE
 echo "---------------------------------------------------------------------------"
 
