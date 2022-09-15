@@ -136,7 +136,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             if [[ $docker_folder == 'post-trade' && $docker_folder == 'data-agent' ]]
+             if [[ $docker_folder == 'post-trade' ]]
              then
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
