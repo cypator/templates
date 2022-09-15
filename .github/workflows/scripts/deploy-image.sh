@@ -34,7 +34,7 @@ do
       echo "image_tags: $image_tags"      
     fi
 
-    if [[ $SERVICE_NAME != 'kafka-ui' ]]
+    if [[ "$SERVICE_NAME" != "kafka-ui" ]]
     then
         echo "$image_tags" | jq '.[]' | while read -r tag; do 
             re='^[0-9]+$'
