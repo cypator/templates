@@ -171,17 +171,17 @@ jobs:
       - name: printing github sha
         run: |
           echo "The env github sha is: ${{ env.gitSha }}"
-      - name: check if image exists for the branch name
-        id: check-image
-        run: |
-          bash .github/workflows/scripts/deploy-image.sh
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
           repository: 'cypator/devops'
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: develop    
+          ref: develop
+      - name: check if image exists for the branch name
+        id: check-image
+        run: |
+          bash .github/workflows/scripts/deploy-image.sh
       - name: creating zip values.yaml
         uses: montudor/action-zip@v0.1.0
         with:

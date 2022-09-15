@@ -6,6 +6,7 @@ echo "target_env: $TARGET_ENV"
 OUTPUT_PATH=${OUTPUT_PATH:=versions.command}
 echo "output_path: $OUTPUT_PATH"
 ROOT_FOLDER=${GITHUB_WORKSPACE:=$SCRIPT_DIR/devops}
+ROOT_FOLDER="/Users/iliagerman/Work/Sela/Clients/cypator"
 echo "root_folder: $ROOT_FOLDER"
 HELM_SERVICES_FOLDER="$ROOT_FOLDER/devops/services"
 echo "helm_service_folder: $HELM_SERVICES_FOLDER"
