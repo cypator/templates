@@ -4,13 +4,6 @@ concurrency:
   cancel-in-progress: false
 on:
   workflow_call:
-    inputs:
-      service_name:
-        required: true
-        type: string
-      docker_arguments:
-        required: false
-        type: string
     secrets:
       aws-access-key-id:
         description: "access key id for ecr"
@@ -48,20 +41,6 @@ jobs:
           aws-access-key-id: ${{ secrets.aws-access-key-id }}
           aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
           aws-region: us-east-1
-      - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
-        run: |
-          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
-          echo "mvnuser: $mvn_username"
-          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r '.MVN_PASSWORD')
-          echo "mvnpass: $mvn_password"
-          sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
-          sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
-      - name: Converting upper case to lower case
-        id: string
-        uses: ASzc/change-string-case-action@v2
-        with:
-          string: ${{ inputs.service_name }}
       - name: printing repository name
         run: echo ${{ steps.string.outputs.lowercase }}
       - name: set branch-name
