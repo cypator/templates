@@ -1,0 +1,107 @@
+name: CI-template
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }} 
+  cancel-in-progress: false
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      docker_arguments:
+        required: false
+        type: string
+    secrets:
+      aws-access-key-id:
+        description: "access key id for ecr"
+        required: true
+      aws-secret-access-key:
+        description: "secret access key for ecr"
+        required: true
+      helm-repo-access-key:
+        description: "clone into devops repo"
+        required: true
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-20.04
+    env:
+      gitSha: ${{ github.sha }}
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          repository: 'cypator/devops'
+          path: devops
+          token: ${{ secrets.helm-repo-access-key }}
+          ref: develop    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: us-east-1
+      - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
+        run: |
+          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
+          echo "mvnuser: $mvn_username"
+          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r '.MVN_PASSWORD')
+          echo "mvnpass: $mvn_password"
+          sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
+          sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
+      - name: Converting upper case to lower case
+        id: string
+        uses: ASzc/change-string-case-action@v2
+        with:
+          string: ${{ inputs.service_name }}
+      - name: printing repository name
+        run: echo ${{ steps.string.outputs.lowercase }}
+      - name: set branch-name
+        id: branch-name
+        run: |
+          echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
+          echo "::set-output name=branch::${{ env.BRANCH_NAME }}"  
+      - name: creating zip values.yaml
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ./devops"
+      - name: checking if zip file exist
+        run: |
+          pwd
+          ls -la
+      - name: copy zip file to s3
+        run: |
+          command=$(aws s3 cp ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip s3://cypatorbackend/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip)
+          echo "s3 command: $command"
+      - name: public zip file as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
+      - name: printing branch
+        run: |
+          echo "branch name: ${{ steps.branch-name.outputs.branch }}"
+      - name: deploying app
+        if: ${{ env.BRANCH_NAME == 'develop' }}
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: cypator
+          repo: devops
+          github_token: ${{ secrets.helm-repo-access-key }}
+          workflow_file_name: deploy.yml
+          ref: develop
+          wait_interval: 10
+          client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
+
+
+
+
+
