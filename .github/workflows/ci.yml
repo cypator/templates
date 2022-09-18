@@ -1,0 +1,51 @@
+name: CI-template
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      docker_arguments:
+        required: false
+        type: string
+    secrets:
+      aws-access-key-id:
+        description: "access key id for ecr"
+        required: true
+      aws-secret-access-key:
+        description: "secret access key for ecr"
+        required: true
+      helm-repo-access-key:
+        description: "clone into devops repo"
+        required: true
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-20.04
+    env:
+      gitSha: ${{ github.sha }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: set branch-name
+        id: branch-name
+        run: |
+          echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
+          echo "::set-output name=branch::${{ env.BRANCH_NAME }}"  
+      - name: get changed files (not pr)
+        id: changed-files-not-pr
+        run: |
+          changed_files=$(git diff --name-only `git merge-base $GITHUB_REF_NAME HEAD`)
+          echo "changed_file: $changed_file"
+          # while IFS= read -r changed_file ; do 
+          #   echo "changed_file: $changed_file"
+          #   if [[ "$changed_file" == *"packages/"* || "$changed_file" == *"ee/packages/"* ]]; then
+          #     all_changed_files=$all_changed_files",$changed_file"
+          #   fi
+          # done <<< "$changed_files"
+          # all_changed_files="${all_changed_files:1}"
+          # echo "all_changed_files: $all_changed_files"
+          # echo "::set-output name=all_changed_files::$all_changed_files"
