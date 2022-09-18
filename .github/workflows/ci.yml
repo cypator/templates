@@ -38,14 +38,13 @@ jobs:
       - name: get changed files (not pr)
         id: changed-files-not-pr
         run: |
-          changed_files=$(git diff --name-only `git merge-base $GITHUB_REF_NAME HEAD`)
-          echo "changed_file: $changed_file"
-          # while IFS= read -r changed_file ; do 
-          #   echo "changed_file: $changed_file"
-          #   if [[ "$changed_file" == *"packages/"* || "$changed_file" == *"ee/packages/"* ]]; then
-          #     all_changed_files=$all_changed_files",$changed_file"
-          #   fi
-          # done <<< "$changed_files"
+          changed_files=$(git diff --name-only `git merge-base origin/${{ env.BRANCH_NAME }} HEAD`)
+          while IFS= read -r changed_file ; do 
+            echo "changed_file: $changed_file"
+            # if [[ "$changed_file" == *"packages/"* || "$changed_file" == *"ee/packages/"* ]]; then
+            #   all_changed_files=$all_changed_files",$changed_file"
+            # fi
+          done <<< "$changed_files"
           # all_changed_files="${all_changed_files:1}"
           # echo "all_changed_files: $all_changed_files"
           # echo "::set-output name=all_changed_files::$all_changed_files"
