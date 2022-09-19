@@ -13,7 +13,7 @@ print(f"root_folder: {root_folder}")
 services_output_file = os.getenv('SERVICES_OUPTUT_PATH', os.path.join(root_folder, 'service_build_list.json'))
 print(f"services_output_file: {services_output_file}")
 changed_folders = []
-changed_files = os.getenv('CHANGED_FILES_PR') or os.getenv('CHANGED_FILES_NOT_PR')
+changed_files = os.getenv('CHANGED_FILES')
 print(f"changed_files: {changed_files}")
 service_build_list = []
 dependecies_dict = dict()
