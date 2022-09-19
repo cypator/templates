@@ -31,10 +31,8 @@ def get_changed_folders():
         for changed_file in changed_files.split(','):
             folder_name = changed_file.split('/')[0]
             print(f"folder_name: {folder_name}")
-            service_name=folder_name.lower()
-            print(f"service_name: {service_name}")
-            if (service_name not in changed_folders):
-                changed_folders.append(service_name)
+            if (folder_name not in changed_folders):
+                changed_folders.append(folder_name)
     print(f"changed_folders: {changed_folders}")
     return changed_folders
 
@@ -44,7 +42,8 @@ def get_service_list():
     all_services = os.listdir(helm_services_folder)
     print(f"all_services: {all_services}")
     for changed_folder in changed_folders:
-        if is_service(all_services, changed_folder):
+        service_name=changed_folder.lower()
+        if is_service(all_services, service_name):
             service_build_list.append(changed_folder)
             print(f"service_build_list: {service_build_list}")
     print(f"service_list1: {service_build_list}")

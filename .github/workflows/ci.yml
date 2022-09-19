@@ -116,9 +116,16 @@ jobs:
       - name: Cat Settings.xml file
         if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
         run: cat .github/workflows/settings.xml
+      - name: Converting upper case to lower case
+        id: string
+        uses: ASzc/change-string-case-action@v2
+        with:
+          string: ${{ inputs.service_name }}
+      - name: printing repository name
+        run: echo ${{ steps.string.outputs.lowercase }}
       - name: Check if repo exist
         run: |
-          repo_name=$SERVICE_NAME
+          repo_name=$(echo ${{ steps.string.outputs.lowercase }})
           echo $repo_name
           aws ecr describe-repositories --repository-names $repo_name || aws ecr create-repository --repository-name $repo_name
       - name: get services hash
@@ -148,7 +155,7 @@ jobs:
         id: hash-tag-exist
         run: |
           set +e
-          cmd="$(aws ecr describe-images --repository-name=$SERVICE_NAME --image-ids=imageTag=${{ steps.service-hashes.outputs.image_hash }})"
+          cmd="$(aws ecr describe-images --repository-name=${{ steps.string.outputs.lowercase }} --image-ids=imageTag=${{ steps.service-hashes.outputs.image_hash }})"
           if [[ ! -z "$cmd" ]]
           then
             echo "tag already exist"
@@ -171,7 +178,7 @@ jobs:
           TAG_LIST: "${{github.run_number}},${{ github.sha }},${{ env.BRANCH_NAME }}"
           IMAGE_TAG: ${{ steps.service-hashes.outputs.image_hash }}
         run: |
-          repo_name=$SERVICE_NAME
+          repo_name=$(echo ${{ steps.string.outputs.lowercase }})
           Docker_image=$ECR_REGISTRY/$repo_name:$IMAGE_TAG
           echo "Docker_image: $Docker_image"
           docker_folder=$(echo ${{ inputs.service_name }})
@@ -208,7 +215,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           TAG_LIST_SHORT: "${{ env.BRANCH_NAME }}"
           TAG_LIST_FULL: "${{ env.BRANCH_NAME }},${{github.run_number}}"
-          ECR_REPOSITORY: "$SERVICE_NAME"
+          ECR_REPOSITORY: "${{ steps.string.outputs.lowercase }}"
         run: |
           if [[ "$HASH_TAG_EXIST" == 'true' ]]
           then
@@ -219,7 +226,7 @@ jobs:
             export TAG_LIST=$TAG_LIST_FULL
           fi
           echo $TAG_LIST
-          export MANIFEST=$(aws ecr batch-get-image --repository-name $SERVICE_NAME --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
+          export MANIFEST=$(aws ecr batch-get-image --repository-name ${{ steps.string.outputs.lowercase }} --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
           echo "MANIFEST: $MANIFEST"
           sh ./devops/scripts/ecr_retag.sh
       - name: printing github sha
@@ -250,5 +257,14 @@ jobs:
       - name: printing branch
         run: |
           echo "branch name: ${{ steps.branch-name.outputs.branch }}"
-
-  
+      - name: deploying app
+        if: ${{ env.BRANCH_NAME == 'develop' }}
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: cypator
+          repo: devops
+          github_token: ${{ secrets.helm-repo-access-key }}
+          workflow_file_name: deploy.yml
+          ref: develop
+          wait_interval: 10
+          client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
