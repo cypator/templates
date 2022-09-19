@@ -27,8 +27,6 @@ jobs:
       gitSha: ${{ github.sha }}
     outputs:
       services: ${{ steps.build_list.outputs.service_build_list }}
-    env:
-      gitSha: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v2
         with:
