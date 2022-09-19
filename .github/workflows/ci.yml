@@ -58,6 +58,7 @@ jobs:
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           pip install checksumdir
           python .github/workflows/scripts/get-service-build-list.py
-          package_build_list=$(cat $GITHUB_WORKSPACE/package_build_list.json | jq -r .)
-          echo "package_build_list: $package_build_list"
-          echo "::set-output name=package_build_list::$package_build_list"
+          service_build_list=$(cat $GITHUB_WORKSPACE/service_build_list.json | jq -r .)
+          echo "service_build_list: $service_build_list"
+          echo "service 1: $service_build_list[0]"
+          echo "::set-output name=service_build_list::$service_build_list"
