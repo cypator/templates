@@ -37,8 +37,8 @@ def get_changed_folders():
             print(f"folder_name: {folder_name}")
             if (folder_name not in changed_folders):
                 changed_folders.append(folder_name)
-    if(service):
-        changed_folders.append(service)
+        if(service):
+            changed_folders.append(service)
     print(f"changed_folders: {changed_folders}")
     return changed_folders
 
