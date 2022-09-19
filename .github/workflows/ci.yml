@@ -63,7 +63,9 @@ jobs:
         id: build_list
         env:
           CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          SERVICE_NAME: ${{ inputs.service_name }}
         run: |
+          echo "service name: $SERVICE_NAME"
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           pip install checksumdir
           # python devops/scripts/get-service-build-list.py
