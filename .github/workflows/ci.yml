@@ -23,6 +23,8 @@ on:
 jobs:
   changes:
     runs-on: ubuntu-18.04
+    env:
+      gitSha: ${{ github.sha }}
     outputs:
       services: ${{ steps.build_list.outputs.service_build_list }}
     env:
@@ -75,8 +77,6 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [changes]
     if: ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
-    env:
-      gitSha: ${{ github.sha }}
     timeout-minutes: 45
     strategy:
       matrix:
