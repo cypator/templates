@@ -75,17 +75,182 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [changes]
     if: ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
+    env:
+      gitSha: ${{ github.sha }}
     timeout-minutes: 45
     strategy:
       matrix:
         service-list: ${{ fromJson(needs.changes.outputs.services) }}
     env:
-      REPOSITORY_NAME: ${{ matrix.service-list }}
+      SERVICE_NAME: ${{ matrix.service-list }}
     steps:
-      - name: Get the output time
-        run: echo "The step output ${{ toJson(matrix.service-list) }}"
-      
-      - name: printing repository name
-        run: echo $REPOSITORY_NAME
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          repository: 'cypator/devops'
+          path: devops
+          token: ${{ secrets.helm-repo-access-key }}
+          ref: develop    
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
+        run: |
+          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
+          echo "mvnuser: $mvn_username"
+          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r '.MVN_PASSWORD')
+          echo "mvnpass: $mvn_password"
+          sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
+          sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
+      - name: Cat Settings.xml file
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
+        run: cat .github/workflows/settings.xml
+      - name: Check if repo exist
+        run: |
+          repo_name=$SERVICE_NAME
+          echo $repo_name
+          aws ecr describe-repositories --repository-names $repo_name || aws ecr create-repository --repository-name $repo_name
+      # - name: get services hash
+      #   id: service-hashes
+      #   run: |
+      #     service=$(echo ${{ inputs.service_name }})
+      #     if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' ]]
+      #     then
+      #       hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
+      #       echo "hash path: $hashPath"
+      #       hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+      #       echo "hash of service (if) is: $hash"
+      #       echo "::set-output name=image_hash::$hash"             
+      #     else
+      #        hashPath=$GITHUB_WORKSPACE
+      #        echo "hash path: $hashPath"
+      #        hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+      #        echo "hash of service (else) is: $hash"
+      #        echo "::set-output name=image_hash::$hash"  
+      #      fi
+      # - name: set branch-name
+      #   id: branch-name
+      #   run: |
+      #     echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
+      #     echo "::set-output name=branch::${{ env.BRANCH_NAME }}"  
+      # - name: Check if image hash tag is already exist in ECR image repository
+      #   id: hash-tag-exist
+      #   run: |
+      #     set +e
+      #     cmd="$(aws ecr describe-images --repository-name=${{ steps.string.outputs.lowercase }} --image-ids=imageTag=${{ steps.service-hashes.outputs.image_hash }})"
+      #     if [[ ! -z "$cmd" ]]
+      #     then
+      #       echo "tag already exist"
+      #       echo "::set-output name=tag_exist::true"
+      #     else
+      #        echo "tag doesn't exist"
+      #        echo "::set-output name=tag_exist::false"
+      #      fi
+      # - name: Read secrets for args docker file
+      #   id: docker-args
+      #   if: ${{ inputs.service_name == 'backoffice' || inputs.service_name == 'trading-webserver' || inputs.service_name == 'trading-nextjs'}} 
+      #   run: |
+      #     args=$(aws secretsmanager get-secret-value --secret-id PACKAGES_REPO_TOKEN --region us-east-1 --query SecretString --output text | jq -r '.PACKAGES_REPO_TOKEN')
+      #     echo "args: $args"
+      #     echo "::set-output name=args::$args"  
+      # - name: Build, tag, and push image to Amazon ECR
+      #   if: ${{ steps.hash-tag-exist.outputs.tag_exist == 'false' }}
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     TAG_LIST: "${{github.run_number}},${{ github.sha }},${{ env.BRANCH_NAME }}"
+      #     IMAGE_TAG: ${{ steps.service-hashes.outputs.image_hash }}
+      #   run: |
+      #     repo_name=$(echo ${{ steps.string.outputs.lowercase }})
+      #     Docker_image=$ECR_REGISTRY/$repo_name:$IMAGE_TAG
+      #     echo "Docker_image: $Docker_image"
+      #     docker_folder=$(echo ${{ inputs.service_name }})
+      #     echo "Service: $docker_folder"
+      #     arguments=$(echo ${{ inputs.docker_arguments }})
+      #     echo "Arguments: $arguments"
+      #     if [[ ! -z $arguments ]]
+      #     then
+      #       echo "there are arguments"
+      #       arguments=${{ steps.docker-args.outputs.args }}
+      #       echo "Arguments: $arguments"
+      #       if [[ $docker_folder == 'trading-nextjs' ]]
+      #       then
+      #         command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments --build-arg BACKEND_SERVICE_URL=https://backend.dev.cypator.net . "
+      #       else
+      #          command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
+      #       fi
+      #     else
+      #        echo "there are no arguments in docker file"
+      #        docker_files='post-trade|data-agent'
+      #        if [[ "$docker_files" == *"$docker_folder"* ]]
+      #        then
+      #          command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
+      #        else
+      #           command="docker build -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
+      #        fi
+      #      fi
+      #     echo "$command"
+      #     $command
+      #     docker push $Docker_image
+      # - name: Retag
+      #   env:
+      #     HASH_TAG_EXIST: ${{ steps.hash-tag-exist.outputs.tag_exist }}
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     TAG_LIST_SHORT: "${{ env.BRANCH_NAME }}"
+      #     TAG_LIST_FULL: "${{ env.BRANCH_NAME }},${{github.run_number}}"
+      #     ECR_REPOSITORY: "${{ steps.string.outputs.lowercase }}"
+      #   run: |
+      #     if [[ "$HASH_TAG_EXIST" == 'true' ]]
+      #     then
+      #       echo "tag already exist"
+      #       export TAG_LIST=$TAG_LIST_SHORT
+      #     else
+      #       echo "tag doesn't exist"
+      #       export TAG_LIST=$TAG_LIST_FULL
+      #     fi
+      #     echo $TAG_LIST
+      #     export MANIFEST=$(aws ecr batch-get-image --repository-name ${{ steps.string.outputs.lowercase }} --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
+      #     echo "MANIFEST: $MANIFEST"
+      #     sh ./devops/scripts/ecr_retag.sh
+      # - name: printing github sha
+      #   run: |
+      #     echo "The env github sha is: ${{ env.gitSha }}"
+      # - name: check if image exists for the branch name
+      #   id: check-image
+      #   run: |
+      #     ls
+      #     bash ./devops/scripts/deploy-image.sh
+      # - name: creating zip values.yaml
+      #   uses: montudor/action-zip@v0.1.0
+      #   with:
+      #     args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ./devops"
+      # - name: checking if zip file exist
+      #   run: |
+      #     pwd
+      #     ls -la
+      # - name: copy zip file to s3
+      #   run: |
+      #     command=$(aws s3 cp ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip s3://cypatorbackend/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip)
+      #     echo "s3 command: $command"
+      # - name: public zip file as artifact
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: my-artifact
+      #     path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
+      # - name: printing branch
+      #   run: |
+      #     echo "branch name: ${{ steps.branch-name.outputs.branch }}"
 
   
