@@ -12,6 +12,8 @@ root_folder = os.getenv('GITHUB_WORKSPACE', Path(__file__).parents[3])
 print(f"root_folder: {root_folder}")
 services_output_file = os.getenv('SERVICES_OUPTUT_PATH', os.path.join(root_folder, 'service_build_list.json'))
 print(f"services_output_file: {services_output_file}")
+helm_services_folder = os.getenv('HELM_SERVICES_FOLDER', os.path.join(root_folder, 'devops/services'))
+print(f"helm_services_folder: {helm_services_folder}")
 changed_folders = []
 changed_files = os.getenv('CHANGED_FILES')
 print(f"changed_files: {changed_files}")
@@ -21,20 +23,26 @@ dependecies_dict = dict()
 def is_service(service_list, service_name) -> bool:
     return service_name in service_list
 
-def get_service_list():
+
+def get_changed_folders():
     if not changed_files:
         print('no changed files')
     else:
         for changed_file in changed_files.split(','):
             folder_name = changed_file.split('/')[0]
-            #service_name=folder_name.lower()
             print(f"folder_name: {folder_name}")
-            #checking if the change folder was a service
-            dockerPath=f"{root_folder}/{folder_name}/Dockerfile"
-            print(f"dockerfile: {dockerPath}")
-            if os.path.exists(dockerPath):
-              service_build_list.append(folder_name)
-              print(f"service_build_list: {service_build_list}")
+            if (folder_name not in changed_folders):
+                changed_folders.append(folder_name)
+    print(f"changed_folders: {changed_folders}")
+    return changed_folders
+
+def get_service_list():
+    changed_folders = get_changed_folders()
+    all_services = os.listdir(helm_services_folder)
+    for changed_folder in changed_folders:
+        if is_service(all_services, changed_folder):
+            service_build_list.append(changed_folder)
+            print(f"service_build_list: {service_build_list}")
     print(f"service_list1: {service_build_list}")
     return service_build_list
 
