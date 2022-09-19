@@ -38,7 +38,9 @@ def get_changed_folders():
 
 def get_service_list():
     changed_folders = get_changed_folders()
+    print(f"changed_folders: {changed_folders}")
     all_services = os.listdir(helm_services_folder)
+    print(f"changed_folders: {all_services}")
     for changed_folder in changed_folders:
         if is_service(all_services, changed_folder):
             service_build_list.append(changed_folder)
