@@ -25,7 +25,6 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       gitSha: ${{ github.sha }}
-      SERVICE_NAME: ${{ inputs.service_name }}
     outputs:
       services: ${{ steps.build_list.outputs.service_build_list }}
     steps:
@@ -38,7 +37,6 @@ jobs:
           echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
           echo "::set-output name=branch::${{ env.BRANCH_NAME }}"  
       - name: get changed files
-        if: ${{ inputs.service_name }} == ""
         id: changed-files
         run: |
           changed_files=$(git diff --name-only `git merge-base origin/develop HEAD`)
