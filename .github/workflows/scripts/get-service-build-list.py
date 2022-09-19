@@ -18,7 +18,7 @@ changed_folders = []
 changed_files = os.getenv('CHANGED_FILES')
 print(f"changed_files: {changed_files}")
 service = os.getenv('SERVICE_NAME')
-print(f"changed_files: {service}")
+print(f"service: {service}")
 service_build_list = []
 dependecies_dict = dict()
 
@@ -29,16 +29,19 @@ def is_service(service_list, service_name) -> bool:
 def get_changed_folders():
     if not changed_files:
         print('no changed files')
+        if(service):
+            changed_folders.append(service)
     else:
         for changed_file in changed_files.split(','):
             folder_name = changed_file.split('/')[0]
             print(f"folder_name: {folder_name}")
             if (folder_name not in changed_folders):
                 changed_folders.append(folder_name)
-    if(not service):
+    if(service):
         changed_folders.append(service)
     print(f"changed_folders: {changed_folders}")
     return changed_folders
+
 
 def get_service_list():
     changed_folders = get_changed_folders()
