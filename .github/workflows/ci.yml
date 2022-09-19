@@ -36,7 +36,7 @@ jobs:
           echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
           echo "::set-output name=branch::${{ env.BRANCH_NAME }}"  
       - name: get changed files (not pr)
-        id: changed-files-not-pr
+        id: changed-files
         run: |
           changed_files=$(git diff --name-only `git merge-base origin/develop HEAD`)
           while IFS= read -r changed_file ; do 
@@ -46,3 +46,18 @@ jobs:
           all_changed_files="${all_changed_files:1}"
           echo "all_changed_files: $all_changed_files"
           echo "::set-output name=all_changed_files::$all_changed_files"
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 #install the python needed
+      - name: create package list
+        id: build_list
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          pip install checksumdir
+          python .github/workflows/scripts/get-service-build-list.py
+          package_build_list=$(cat $GITHUB_WORKSPACE/package_build_list.json | jq -r .)
+          echo "package_build_list: $package_build_list"
+          echo "::set-output name=package_build_list::$package_build_list"
