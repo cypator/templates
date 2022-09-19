@@ -28,9 +28,9 @@ jobs:
     env:
       gitSha: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      # - uses: actions/checkout@v2
+      #   with:
+      #     fetch-depth: 0
       - name: set branch-name
         id: branch-name
         run: |
@@ -54,6 +54,12 @@ jobs:
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
           ref: develop  
+      - name: check devops path
+        run: |
+          pwd
+          ls
+          cd devops
+          ls
       - name: setup python
         uses: actions/setup-python@v2
         with:
