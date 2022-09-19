@@ -17,6 +17,8 @@ print(f"helm_services_folder: {helm_services_folder}")
 changed_folders = []
 changed_files = os.getenv('CHANGED_FILES')
 print(f"changed_files: {changed_files}")
+service = os.getenv('SERVICE_NAME')
+print(f"changed_files: {service}")
 service_build_list = []
 dependecies_dict = dict()
 
@@ -33,6 +35,8 @@ def get_changed_folders():
             print(f"folder_name: {folder_name}")
             if (folder_name not in changed_folders):
                 changed_folders.append(folder_name)
+    if(not service):
+        changed_folders.append(service)
     print(f"changed_folders: {changed_folders}")
     return changed_folders
 
