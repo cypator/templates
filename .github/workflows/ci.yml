@@ -58,7 +58,7 @@ jobs:
         run: |
           pwd
           ls
-          cd devops
+          cd devops/services
           ls
       - name: setup python
         uses: actions/setup-python@v2
@@ -71,7 +71,7 @@ jobs:
         run: |
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           pip install checksumdir
-          python ./devops/scripts/get-service-build-list.py
+          python devops/scripts/get-service-build-list.py
           service_build_list=$(cat $GITHUB_WORKSPACE/service_build_list.json | jq -r .)
           echo "service_build_list: $service_build_list"
           echo "::set-output name=service_build_list::$service_build_list"
