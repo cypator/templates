@@ -122,7 +122,7 @@ jobs:
         id: string
         uses: ASzc/change-string-case-action@v2
         with:
-          string: ${{ inputs.service_name }}
+          string: $SERVICE_NAME
       - name: printing repository name
         run: echo ${{ steps.string.outputs.lowercase }}
       - name: Check if repo exist
