@@ -9,16 +9,7 @@ on:
       docker_arguments:
         required: false
         type: string
-    secrets:
-      aws-access-key-id:
-        description: "access key id for ecr"
-        required: true
-      aws-secret-access-key:
-        description: "secret access key for ecr"
-        required: true
-      helm-repo-access-key:
-        description: "clone into devops repo"
-        required: true
+
 
 jobs:
   changes:
@@ -52,7 +43,7 @@ jobs:
           fetch-depth: 1
           repository: 'cypator/devops'
           path: devops
-          token: ${{ secrets.helm-repo-access-key }}
+          token: ${{ secrets.HELM_TOKEN }}
           ref: develop  
       - name: setup python
         uses: actions/setup-python@v2
@@ -93,15 +84,15 @@ jobs:
           fetch-depth: 1
           repository: 'cypator/devops'
           path: devops
-          token: ${{ secrets.helm-repo-access-key }}
+          token: ${{ secrets.HELM_TOKEN }}
           ref: develop    
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.aws-access-key-id }}
-          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Login to Amazon ECR
         id: login-ecr
@@ -267,7 +258,7 @@ jobs:
         with:
           owner: cypator
           repo: devops
-          github_token: ${{ secrets.helm-repo-access-key }}
+          github_token: ${{ secrets.HELM_TOKEN }}
           workflow_file_name: deploy.yml
           ref: develop
           wait_interval: 10
