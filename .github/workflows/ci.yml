@@ -206,7 +206,7 @@ jobs:
              then
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
-                command="docker build -f $docker_folder/service_path . -t $Docker_image --progress=plain"
+                command="docker build -f $docker_folder/$service_path . -t $Docker_image --progress=plain"
              fi
            fi
           echo "$command"
