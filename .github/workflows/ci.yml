@@ -204,7 +204,7 @@ jobs:
              if [[ -z $docker_folder ]]
              then
               echo "this is appComponent service or Translation services"
-              command="docker build -f $docker_folder/$service_path . -t $Docker_image --progress=plain"
+              command="docker build -f $service_path/Dockerfile . -t $Docker_image --progress=plain"
              else
                 echo "this is post-trade service or data-agent"
                 command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
