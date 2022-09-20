@@ -134,9 +134,9 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' ]]
+          if [[ -z $service ]]
           then
-            hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
+            hashPath=$GITHUB_WORKSPACE/${{ env.SERVICE_NAME }}
             echo "hash path: $hashPath"
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
             echo "hash of service (if) is: $hash"
@@ -185,6 +185,7 @@ jobs:
           echo "Docker_image: $Docker_image"
           docker_folder=$(echo ${{ inputs.service_name }})
           echo "Service: $docker_folder"
+          service_path=${{ env.SERVICE_NAME }}
           arguments=$(echo ${{ inputs.docker_arguments }})
           echo "Arguments: $arguments"
           if [[ ! -z $arguments ]]
@@ -205,7 +206,7 @@ jobs:
              then
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              else
-                command="docker build -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
+                command="docker build -f $docker_folder/service_path . -t $Docker_image --progress=plain"
              fi
            fi
           echo "$command"
