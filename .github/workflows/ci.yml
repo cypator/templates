@@ -201,13 +201,13 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             docker_files='post-trade|data-agent'
-             if [[ "$docker_files" == *"$docker_folder"* ]]
+             if [[ -z $docker_folder ]]
              then
-               echo "I'm here"
-               command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
+              echo "this is appComponent service or Translation services"
+              command="docker build -f $docker_folder/$service_path . -t $Docker_image --progress=plain"
              else
-                command="docker build -f $docker_folder/$service_path . -t $Docker_image --progress=plain"
+                echo "this is post-trade service or data-agent"
+                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
              fi
            fi
           echo "$command"
