@@ -4,6 +4,7 @@ on:
   workflow_call:
     inputs:
       service_name:
+        description: "you need to add this input when your dockerfile in the root folder"
         required: false
         type: string
       docker_arguments:
@@ -58,6 +59,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8 #install the python needed
+      - name: checking pwd
+        run: |
+          cd devops/scripts
+          ls
       - name: create package list
         id: build_list
         env:
@@ -67,8 +72,8 @@ jobs:
           echo "service name: $SERVICE_NAME"
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           pip install checksumdir
-          # python devops/scripts/get-service-build-list.py
-          python .github/workflows/scripts/get-service-build-list.py
+          python devops/scripts/get-service-build-list.py
+          # python .github/workflows/scripts/get-service-build-list.py
           service_build_list=$(cat $GITHUB_WORKSPACE/service_build_list.json | jq -r .)
           echo "service_build_list: $service_build_list"
           echo "::set-output name=service_build_list::$service_build_list"
