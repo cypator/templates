@@ -54,7 +54,7 @@ jobs:
           repository: 'cypator/devops'
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: develop  
+          ref: feature/updateDeploy 
       - name: setup python
         uses: actions/setup-python@v2
         with:
