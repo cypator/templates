@@ -26,6 +26,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+      - name: set branch-name
+        id: branch-name
+        run: |
+          echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
+          echo "::set-output name=branch::${{ env.BRANCH_NAME }}"
       - name: Checkout - Devops
         uses: actions/checkout@v3
         with:
@@ -33,7 +38,7 @@ jobs:
           repository: "cypator/devops"
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: $GITHUB_REF_NAME
+          ref: ${{ env.BRANCH_NAME }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -42,11 +47,7 @@ jobs:
           aws-region: us-east-1
       - name: printing repository name
         run: echo ${{ steps.string.outputs.lowercase }}
-      - name: set branch-name
-        id: branch-name
-        run: |
-          echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
-          echo "::set-output name=branch::${{ env.BRANCH_NAME }}"
+      
       - name: create versions yaml
         id: check-image
         run: |
