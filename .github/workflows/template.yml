@@ -214,7 +214,7 @@ jobs:
           workflow_file_name: deploy.yml
           ref: develop
           wait_interval: 10
-          client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
+          #client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
 
 
 
