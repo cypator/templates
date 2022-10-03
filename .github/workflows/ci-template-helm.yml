@@ -38,7 +38,7 @@ jobs:
           repository: "cypator/devops"
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: ${{ env.BRANCH_NAME }}
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
