@@ -211,10 +211,10 @@ jobs:
           owner: cypator
           repo: devops
           github_token: ${{ secrets.helm-repo-access-key }}
-          workflow_file_name: deploy.yml
+          workflow_file_name: deploy-helm.yml
           ref: develop
           wait_interval: 10
-          #client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
+          client_payload: '{"source_branch": "${{ env.BRANCH_NAME }}", "target-env": "dev"}'
 
 
 
