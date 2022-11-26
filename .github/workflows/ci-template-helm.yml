@@ -74,7 +74,7 @@ jobs:
         run: |
           echo "branch name: ${{ steps.branch-name.outputs.branch }}"
       - name: deploying app
-        if: ${{ env.BRANCH_NAME == 'develop' }}
+        if: ${{ env.BRANCH_NAME == 'develop_' }}
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
           owner: cypator
