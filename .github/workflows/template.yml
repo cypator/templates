@@ -194,13 +194,13 @@ jobs:
           ls -la
       - name: copy zip file to s3
         run: |
-          command=$(aws s3 cp ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip s3://cypatorbackend/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip)
+          command=$(aws s3 cp ./${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip s3://cypatorbackend/${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip)
           echo "s3 command: $command"
       - name: public zip file as artifact
         uses: actions/upload-artifact@v1
         with:
           name: my-artifact
-          path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}.zip
+          path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip
       - name: printing branch
         run: |
           echo "branch name: ${{ steps.branch-name.outputs.branch }}"
