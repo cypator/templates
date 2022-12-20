@@ -187,7 +187,7 @@ jobs:
       - name: creating zip values.yaml
         uses: montudor/action-zip@v0.1.0
         with:
-          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}.zip ./devops"
+          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip ./devops"
       - name: checking if zip file exist
         run: |
           pwd
