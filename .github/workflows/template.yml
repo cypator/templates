@@ -79,7 +79,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' ]]
+          if [[ $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
@@ -145,7 +145,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             docker_files='post-trade|data-agent'
+             docker_files='post-trade|data-agent|acceptorengine'
              if [[ "$docker_files" == *"$docker_folder"* ]]
              then
                command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
