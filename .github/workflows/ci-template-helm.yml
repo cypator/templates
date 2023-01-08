@@ -73,14 +73,14 @@ jobs:
       - name: printing branch
         run: |
           echo "branch name: ${{ steps.branch-name.outputs.branch }}"
-      - name: deploying app
-        if: ${{ env.BRANCH_NAME == 'develop_' }}
-        uses: convictional/trigger-workflow-and-wait@v1.6.1
-        with:
-          owner: cypator
-          repo: devops
-          github_token: ${{ secrets.helm-repo-access-key }}
-          workflow_file_name: deploy.yml
-          ref: develop
-          wait_interval: 10
-          #client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
+      # - name: deploying app
+      #   if: ${{ env.BRANCH_NAME == 'develop_' }}
+      #   uses: convictional/trigger-workflow-and-wait@v1.6.1
+      #   with:
+      #     owner: cypator
+      #     repo: devops
+      #     github_token: ${{ secrets.helm-repo-access-key }}
+      #     workflow_file_name: deploy.yml
+      #     ref: develop
+      #     wait_interval: 10
+      #     #client_payload: '{"remote_repo": "${{ env.BRANCH_NAME }}"}'
