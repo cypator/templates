@@ -1,6 +1,6 @@
 name: CI-template
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }} 
+  group: test
   cancel-in-progress: false
 on:
   workflow_call:
