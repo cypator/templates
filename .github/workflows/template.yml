@@ -1,5 +1,4 @@
 name: CI-template
-
 on:
   workflow_call:
     inputs:
@@ -26,6 +25,9 @@ jobs:
     env:
       gitSha: ${{ github.sha }}
     timeout-minutes: 45
+    concurrency:
+      group: ${{ inputs.service_name }}
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
