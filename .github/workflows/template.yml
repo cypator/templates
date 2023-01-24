@@ -1,7 +1,7 @@
 name: CI-template
 concurrency:
   group: test
-  cancel-in-progress: false
+  cancel-in-progress: true
 on:
   workflow_call:
     inputs:
