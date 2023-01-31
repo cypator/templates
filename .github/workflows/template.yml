@@ -33,6 +33,25 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+      - name: get services hash
+        id: service-hashes
+        run: |
+          service=$(echo ${{ inputs.service_name }})
+          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' ]]
+          then
+            hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
+            echo "hash path: $hashPath"
+            hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+            echo "hash of service (if) is: $hash"
+            echo "::set-output name=image_hash::$hash"             
+          else
+             hashPath=$GITHUB_WORKSPACE
+             echo "hash path: $hashPath"
+             ls $hashPath
+             hash="$(find ${hashPath} -type f -not -path "${hashPath}/.git/*" -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+             echo "hash of service (else) is: $hash"
+             echo "::set-output name=image_hash::$hash"  
+           fi
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
@@ -75,25 +94,6 @@ jobs:
           repo_name=$(echo ${{ steps.string.outputs.lowercase }})
           echo $repo_name
           aws ecr describe-repositories --repository-names $repo_name || aws ecr create-repository --repository-name $repo_name
-      - name: get services hash
-        id: service-hashes
-        run: |
-          service=$(echo ${{ inputs.service_name }})
-          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' ]]
-          then
-            hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
-            echo "hash path: $hashPath"
-            hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
-            echo "hash of service (if) is: $hash"
-            echo "::set-output name=image_hash::$hash"             
-          else
-             hashPath=$GITHUB_WORKSPACE
-             echo "hash path: $hashPath"
-             ls $hashPath
-             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
-             echo "hash of service (else) is: $hash"
-             echo "::set-output name=image_hash::$hash"  
-           fi
       - name: set branch-name
         id: branch-name
         run: |
