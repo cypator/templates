@@ -48,7 +48,7 @@ jobs:
              hashPath=$GITHUB_WORKSPACE
              echo "hash path: $hashPath"
              ls -a $hashPath
-             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+             hash="$(find ${hashPath} -type f -not -path "${hashPath}/.git/*" -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
              echo "hash of service (else) is: $hash"
              hash="$(find ${hashPath}/src -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
              echo "hash of service (else) is: $hash"
