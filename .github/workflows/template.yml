@@ -57,7 +57,7 @@ jobs:
           repository: 'cypator/devops'
           path: devops
           token: ${{ secrets.helm-repo-access-key }}
-          ref: develop    
+          ref: develop
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Configure AWS credentials
@@ -88,11 +88,12 @@ jobs:
           string: ${{ inputs.service_name }}
       - name: printing repository name
         run: echo ${{ steps.string.outputs.lowercase }}
-      - name: Check if repo exist
+      - name: Check if repo exist and put prod policy
         run: |
           repo_name=$(echo ${{ steps.string.outputs.lowercase }})
           echo $repo_name
           aws ecr describe-repositories --repository-names $repo_name || aws ecr create-repository --repository-name $repo_name
+          aws ecr set-repository-policy --repository-name $repo_name --policy-text file://devops/.github/workflows/deploy/cross-account-policy.json
       - name: set branch-name
         id: branch-name
         run: |
@@ -123,6 +124,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           TAG_LIST: "${{github.run_number}},${{ github.sha }},${{ env.BRANCH_NAME }}"
+          branch_name: ${{ env.BRANCH_NAME }}
           IMAGE_TAG: ${{ steps.service-hashes.outputs.image_hash }}
         run: |
           repo_name=$(echo ${{ steps.string.outputs.lowercase }})
@@ -155,8 +157,12 @@ jobs:
            fi
           echo "$command"
           $command
-          docker push $Docker_image
+          if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' ]]
+          then
+            docker push $Docker_image
+          fi
       - name: Retag
+        if: ${{steps.branch-name.outputs.branch == 'develop'}} || ${{steps.branch-name.outputs.branch == 'uat'}} || ${{steps.branch-name.outputs.branch == 'production'}}
         env:
           HASH_TAG_EXIST: ${{ steps.hash-tag-exist.outputs.tag_exist }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -176,42 +182,47 @@ jobs:
           export MANIFEST=$(aws ecr batch-get-image --repository-name ${{ steps.string.outputs.lowercase }} --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
           echo "MANIFEST: $MANIFEST"
           sh ./devops/scripts/ecr_retag.sh
-      - name: printing github sha
+      - name: push new tag to values file
+        if: ${{steps.branch-name.outputs.branch == 'develop'}} || ${{steps.branch-name.outputs.branch == 'uat'}} || ${{steps.branch-name.outputs.branch == 'production'}}
         run: |
-          echo "The env github sha is: ${{ env.gitSha }}"
-      - name: check if image exists for the branch name
-        id: check-image
-        run: |
-          ls
-          bash ./devops/scripts/deploy-image.sh
-      - name: creating zip values.yaml
-        uses: montudor/action-zip@v0.1.0
-        with:
-          args: "zip -r ./${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip ./devops"
-      - name: checking if zip file exist
-        run: |
-          pwd
-          ls -la
-      - name: copy zip file to s3
-        run: |
-          command=$(aws s3 cp ./${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip s3://cypatorbackend/${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip)
-          echo "s3 command: $command"
-      - name: public zip file as artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: my-artifact
-          path: ${{ github.workspace }}/${{github.run_number}}-${{ env.BRANCH_NAME }}-${{ env.gitSha }}.zip
-      - name: printing branch
-        run: |
-          echo "branch name: ${{ steps.branch-name.outputs.branch }}"
-      # - name: deploying app
-      #   if: ${{ env.BRANCH_NAME == 'develop' }}
-      #   uses: convictional/trigger-workflow-and-wait@v1.6.1
-      #   with:
-      #     owner: cypator
-      #     repo: devops
-      #     github_token: ${{ secrets.helm-repo-access-key }}
-      #     workflow_file_name: deploy-helm.yml
-      #     ref: develop
-      #     wait_interval: 10
-      #     client_payload: '{"source_branch": "${{ env.BRANCH_NAME }}", "target-env": "dev"}'
+          cd devops
+          echo "git branch"
+          git branch
+          export tag=$(aws ecr describe-images --repository-name ${{ steps.string.outputs.lowercase }} --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json |jq -r '.imageDetails[0].imageTags[] | select(test("^[0-9]+$"))')
+          echo $tag
+          if [[ $branch_name == 'develop' ]]
+          then
+            file_name=values-cycling.yaml
+          else
+            file_name=values-${branch_name}.yaml
+          fi
+          yamlfile="./helm/services/${dir_name}/${file_name}"
+          yq  '.image.tag = env(tag)' -i "$yamlfile"
+          cat $yamlfile
+          git config --global user.email "idanm@sela.co.il"
+          git config --global user.name "Idan Malul"
+          git config pull.rebase true
+          git add helm/services/${dir_name}/${file_name}
+
+          echo "check mirror services:"
+          mirror_services=$(echo $(cat scripts/ecr_overwrite.json) | jq  -r ".\"$dir_name\"")
+          if [ "$mirror_services" != "null" ]; then
+            export IFS=","
+            for service in $mirror_services; do 
+              echo "change tag of $service also"
+              yamlfile="./helm/services/${service}/${file_name}"
+              yq  '.image.tag = env(tag)' -i "$yamlfile"
+              cat $yamlfile
+              git add helm/services/${service}/${file_name}
+            done      
+          fi
+          echo "git commit"
+          git commit -m "change tag of ${dir_name} to $tag"
+          echo "git pull"
+          git pull origin develop --autostash
+          echo "git push"
+          git push --force-with-lease
+        env:
+          branch_name: ${{ env.BRANCH_NAME }}
+          dir_name: "${{ steps.string.outputs.lowercase }}"
+
