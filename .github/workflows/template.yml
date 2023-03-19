@@ -157,7 +157,7 @@ jobs:
            fi
           echo "$command"
           $command
-          if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' ]]
+          if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' ]]
           then
             docker push $Docker_image
           fi
