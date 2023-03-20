@@ -43,13 +43,13 @@ jobs:
             echo "hash path: $hashPath"
             hash="$(find ${hashPath} -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
             echo "hash of service (if) is: $hash"
-            echo "::set-output name=image_hash::$hash"             
+            echo "image_hash=$hash" >> $GITHUB_OUTPUT            
           else
              hashPath=$GITHUB_WORKSPACE
              echo "hash path: $hashPath"
              hash="$(find ${hashPath} -type f -not -path "${hashPath}/.git/*" -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
              echo "hash of service (else) is: $hash"
-             echo "::set-output name=image_hash::$hash"  
+             echo "image_hash=$hash" >> $GITHUB_OUTPUT  
            fi
       - uses: actions/checkout@v3
         with:
@@ -98,7 +98,7 @@ jobs:
         id: branch-name
         run: |
           echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
-          echo "::set-output name=branch::${{ env.BRANCH_NAME }}"  
+          echo "branch=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_OUTPUT
       - name: Check if image hash tag is already exist in ECR image repository
         id: hash-tag-exist
         run: |
@@ -107,10 +107,10 @@ jobs:
           if [[ ! -z "$cmd" ]]
           then
             echo "tag already exist"
-            echo "::set-output name=tag_exist::true"
+            echo "tag_exist=true" >> $GITHUB_OUTPUT
           else
              echo "tag doesn't exist"
-             echo "::set-output name=tag_exist::false"
+             echo "tag_exist=false" >> $GITHUB_OUTPUT
            fi
       - name: Read secrets for args docker file
         id: docker-args
@@ -118,7 +118,7 @@ jobs:
         run: |
           args=$(aws secretsmanager get-secret-value --secret-id PACKAGES_REPO_TOKEN --region us-east-1 --query SecretString --output text | jq -r '.PACKAGES_REPO_TOKEN')
           echo "args: $args"
-          echo "::set-output name=args::$args"  
+          echo "args=$args" >> $GITHUB_OUTPUT
       - name: Build, tag, and push image to Amazon ECR
         if: ${{ steps.hash-tag-exist.outputs.tag_exist == 'false' }}
         env:
@@ -162,7 +162,7 @@ jobs:
             docker push $Docker_image
           fi
       - name: Retag
-        if: ${{steps.branch-name.outputs.branch == 'develop'}} || ${{steps.branch-name.outputs.branch == 'uat'}} || ${{steps.branch-name.outputs.branch == 'production'}}
+        if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production'
         env:
           HASH_TAG_EXIST: ${{ steps.hash-tag-exist.outputs.tag_exist }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -183,7 +183,7 @@ jobs:
           echo "MANIFEST: $MANIFEST"
           sh ./devops/scripts/ecr_retag.sh
       - name: push new tag to values file
-        if: ${{steps.branch-name.outputs.branch == 'develop'}} || ${{steps.branch-name.outputs.branch == 'uat'}} || ${{steps.branch-name.outputs.branch == 'production'}}
+        if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production'
         run: |
           cd devops
           echo "git branch"
