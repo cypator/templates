@@ -193,6 +193,9 @@ jobs:
           if [[ $branch_name == 'develop' ]]
           then
             file_name=values-cycling.yaml
+          elif [[ $branch_name == 'production' ]]
+          then
+            file_name=values-prod.yaml
           else
             file_name=values-${branch_name}.yaml
           fi
