@@ -220,7 +220,7 @@ jobs:
             done      
           fi
           echo "git commit"
-          git commit -m "change tag of ${dir_name} to $tag"
+          git commit -m "change tag of ${dir_name} to $tag on $branch_name"
           echo "git pull"
           git pull origin develop --autostash
           echo "git push"
