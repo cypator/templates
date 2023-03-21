@@ -227,5 +227,5 @@ jobs:
           git push --force-with-lease
         env:
           branch_name: ${{ env.BRANCH_NAME }}
-          dir_name: "${{ inputs.service_name }}"
+          dir_name: "${{ steps.string.outputs.lowercase }}"
 
