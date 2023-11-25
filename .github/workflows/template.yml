@@ -163,7 +163,7 @@ jobs:
             docker push $Docker_image
           fi
       - name: Retag
-        if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production'
+        if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production' ||  contains(github.event.head_commit.message, 'build image')
         env:
           HASH_TAG_EXIST: ${{ steps.hash-tag-exist.outputs.tag_exist }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
