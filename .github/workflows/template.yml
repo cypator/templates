@@ -124,6 +124,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           TAG_LIST: "${{github.run_number}},${{ github.sha }},${{ env.BRANCH_NAME }}"
+          COMMIT_MESSAGE: "${{ github.event.head_commit.message }}"
           branch_name: ${{ env.BRANCH_NAME }}
           IMAGE_TAG: ${{ steps.service-hashes.outputs.image_hash }}
         run: |
@@ -157,7 +158,7 @@ jobs:
            fi
           echo "$command"
           $command
-          if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' ]]
+          if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE == *'build image'*]]
           then
             docker push $Docker_image
           fi
