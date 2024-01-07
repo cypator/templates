@@ -191,35 +191,38 @@ jobs:
           git branch
           export tag=$(aws ecr describe-images --repository-name ${{ steps.string.outputs.lowercase }} --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json |jq -r '.imageDetails[0].imageTags[] | select(test("^[0-9]+$"))')
           echo $tag
-          if [[ $branch_name == 'develop' ]]
-          then
-            file_name=values-cycling.yaml
-          elif [[ $branch_name == 'production' ]]
-          then
-            file_name=values-prod.yaml
+          if [[ $branch_name == 'develop' ]]; then
+          file_names=("values-cycling.yaml")
+          elif [[ $branch_name == 'production' ]]; then
+            file_names=("values-prod.yaml" "values-lonprod.yaml")
           else
-            file_name=values-${branch_name}.yaml
+            file_names=("values-${branch_name}.yaml")
           fi
-          yamlfile="./helm/services/${dir_name}/${file_name}"
-          yq  '.image.tag = env(tag)' -i "$yamlfile"
-          cat $yamlfile
+
           git config --global user.email "idanm@sela.co.il"
           git config --global user.name "Idan Malul"
           git config pull.rebase true
-          git add helm/services/${dir_name}/${file_name}
 
-          echo "check mirror services:"
-          mirror_services=$(echo $(cat scripts/ecr_overwrite.json) | jq  -r ".\"$dir_name\"")
-          if [ "$mirror_services" != "null" ]; then
-            export IFS=","
-            for service in $mirror_services; do 
-              echo "change tag of $service also"
-              yamlfile="./helm/services/${service}/${file_name}"
-              yq  '.image.tag = env(tag)' -i "$yamlfile"
-              cat $yamlfile
-              git add helm/services/${service}/${file_name}
-            done      
-          fi
+          for file_name in "${file_names[@]}"; do
+            yamlfile="./helm/services/${dir_name}/${file_name}"
+            yq '.image.tag = env(tag)' -i "$yamlfile"
+            cat $yamlfile
+            git add helm/services/${dir_name}/${file_name}
+
+            echo "check mirror services:"
+            mirror_services=$(echo $(cat scripts/ecr_overwrite.json) | jq  -r ".\"$dir_name\"")
+            if [ "$mirror_services" != "null" ]; then
+              IFS=","
+              for service in $mirror_services; do 
+                echo "change tag of $service also"
+                yamlfile="./helm/services/${service}/${file_name}"
+                yq  '.image.tag = env(tag)' -i "$yamlfile"
+                cat $yamlfile
+                git add helm/services/${service}/${file_name}
+              done
+              unset IFS   
+            fi
+          done
           echo "git commit"
           git commit -m "change tag of ${dir_name} to $tag on $branch_name"
           echo "git pull"
