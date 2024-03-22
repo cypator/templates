@@ -166,11 +166,8 @@ jobs:
           # Push the multi-architecture image to ECR
           if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
           then
-            docker push $Docker_image
+            docker buildx build --platform linux/amd64,linux/arm64 -t $Docker_image --push .
           fi
-
-          # Additional command to build and push the image to ECR using Docker Buildx
-          docker buildx build --platform linux/amd64,linux/arm64 -t $Docker_image --push .
           
       - name: Retag
         if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production' ||  contains(github.event.head_commit.message, 'build image')
