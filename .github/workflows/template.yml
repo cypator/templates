@@ -160,13 +160,12 @@ jobs:
                 command="docker buildx build --platform linux/amd64,linux/arm64 -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
              fi
            fi
+          echo "$command"
           if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
           then
             $command = $command + "--push"
           fi 
-          echo "$command"
-          $command
-
+          $command          
           # Push the multi-architecture image to ECR
           # if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
           # then
