@@ -168,6 +168,10 @@ jobs:
           then
             docker push $Docker_image
           fi
+
+          # Additional command to build and push the image to ECR using Docker Buildx
+          docker buildx build --platform linux/amd64,linux/arm64 -t $Docker_image --push .
+          
       - name: Retag
         if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production' ||  contains(github.event.head_commit.message, 'build image')
         env:
