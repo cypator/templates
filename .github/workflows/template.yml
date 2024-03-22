@@ -162,10 +162,10 @@ jobs:
           # Push the multi-architecture image to ECR
           if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
           then
-            command = command + " --push"
-            echo "$command"
+            command1 = command + " --push"
+            echo "$command1"
           fi
-          $command
+          $command1
           
       - name: Retag
         if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production' ||  contains(github.event.head_commit.message, 'build image')
