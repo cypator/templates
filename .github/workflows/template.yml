@@ -135,6 +135,10 @@ jobs:
           echo "Service: $docker_folder"
           arguments=$(echo ${{ inputs.docker_arguments }})
           echo "Arguments: $arguments"
+
+          # Enable Docker Buildx for multi-architecture builds
+          docker buildx create --use
+
           if [[ ! -z $arguments ]]
           then
             echo "there are arguments"
@@ -142,22 +146,24 @@ jobs:
             echo "Arguments: $arguments"
             if [[ $docker_folder == 'trading-nextjs' ]]
             then
-              command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments --build-arg BACKEND_SERVICE_URL=https://backend.dev.cypator.net . "
+              command="docker buildx build --platform linux/amd64,linux/arm64 -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments --build-arg BACKEND_SERVICE_URL=https://backend.dev.cypator.net . "
             else
-               command="docker build -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
+               command="docker buildx build --platform linux/amd64,linux/arm64 -t $Docker_image -f Dockerfile --build-arg PACKAGES_REPO_TOKEN=$arguments . "
             fi
           else
              echo "there are no arguments in docker file"
              docker_files='rateservice|post-trade|data-agent|acceptorengine|acceptorenginewebsocket'
              if [[ "$docker_files" == *"$docker_folder"* ]]
              then
-               command="docker build -f Dockerfile . -t $Docker_image --progress=plain"
+               command="docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile . -t $Docker_image --progress=plain"
              else
-                command="docker build -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
+                command="docker buildx build --platform linux/amd64,linux/arm64 -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain"
              fi
            fi
           echo "$command"
           $command
+
+          # Push the multi-architecture image to ECR
           if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
           then
             docker push $Docker_image
