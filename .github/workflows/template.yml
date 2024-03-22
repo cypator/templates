@@ -158,12 +158,14 @@ jobs:
              fi
            fi
           echo "$command"
+          
+          # Push the multi-architecture image to ECR
+          if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
+          then
+            command = command + " --push"
+            echo "$command""
+          fi
           $command
-          # # Push the multi-architecture image to ECR
-          # if [[ $branch_name == 'develop' || $branch_name == 'uat' || $branch_name == 'production' || $branch_name == 'productioncertpatch' || $COMMIT_MESSAGE =~ 'build image' ]]
-          # then
-          #   docker buildx build --platform linux/amd64,linux/arm64 -t $Docker_image -f Dockerfile --push .
-          # fi
           
       - name: Retag
         if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production' ||  contains(github.event.head_commit.message, 'build image')
