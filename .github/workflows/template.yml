@@ -157,7 +157,7 @@ jobs:
              then
                command="docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile . -t $Docker_image --progress=plain"
              else
-                command="docker buildx build --platform linux/amd64,linux/arm64 -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain --push" 
+                command="docker buildx build --platform linux/amd64,linux/arm64 -f $docker_folder/Dockerfile . -t $Docker_image --progress=plain" 
              fi
            fi
           echo "$command"
