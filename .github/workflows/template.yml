@@ -203,8 +203,8 @@ jobs:
           else
             file_names=("values-${branch_name}.yaml")
           fi
-          git config --global user.email "idanm@sela.co.il"
-          git config --global user.name "Idan Malul"
+          git config --global user.email "devops_automation@cypator.com"
+          git config --global user.name "DevOps Automation"
           git config pull.rebase true
           for file_name in "${file_names[@]}"; do
             yamlfile="./helm/services/${dir_name}/${file_name}"
