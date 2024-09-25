@@ -209,6 +209,7 @@ jobs:
           for file_name in "${file_names[@]}"; do
             yamlfile="./helm/services/${dir_name}/${file_name}"
             yq '.image.tag = env(tag)' -i "$yamlfile"
+            yq '.commit = env(GITHUB_SHA)' -i "$yamlfile"
             cat $yamlfile
             git add helm/services/${dir_name}/${file_name}
             echo "check mirror services:"
@@ -219,6 +220,7 @@ jobs:
                 echo "change tag of $service also"
                 yamlfile="./helm/services/${service}/${file_name}"
                 yq  '.image.tag = env(tag)' -i "$yamlfile"
+                yq  '.commit = env(GITHUB_SHA)' -i "$yamlfile"
                 cat $yamlfile
                 git add helm/services/${service}/${file_name}
               done
