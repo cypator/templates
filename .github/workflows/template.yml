@@ -228,7 +228,7 @@ jobs:
             fi
           done
           echo "git commit"
-          git commit -m "change tag of ${dir_name} to $tag on $branch_name"
+          git commit -m "change tag of ${dir_name} to $tag on $branch_name (Commit ID: $GITHUB_SHA)"
           echo "git pull"
           git pull origin develop --autostash
           echo "git push"
