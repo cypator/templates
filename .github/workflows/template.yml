@@ -36,7 +36,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' && $service != 'acceptorenginewebsocket' && $service != 'rateservice'  ]]
+          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' && $service != 'acceptorenginewebsocket' && $service != 'rateservice' && $service != 'docs'  ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
