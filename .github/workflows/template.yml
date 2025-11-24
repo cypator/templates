@@ -36,7 +36,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'settlement-service' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' && $service != 'acceptorenginewebsocket' && $service != 'rateservice'  ]]
+          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' && $service != 'acceptorenginewebsocket' && $service != 'rateservice'  ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
@@ -78,7 +78,7 @@ jobs:
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && $service != 'settlement-service' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
