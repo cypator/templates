@@ -149,7 +149,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             docker_files='rateservice|post-trade|data-agent|acceptorengine|acceptorenginewebsocket'
+             docker_files='rateservice|post-trade|data-agent|settlement-service|acceptorengine|acceptorenginewebsocket'
              if [[ "$docker_files" == *"$docker_folder"* ]]
              then
                command="docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile . -t $Docker_image --progress=plain"
