@@ -69,7 +69,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'settlement-service' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
         run: |
           mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
           echo "mvnuser: $mvn_username"
@@ -78,7 +78,7 @@ jobs:
           sed -i 's/MVN_USERNAME/'$mvn_username'/' .github/workflows/settings.xml
           sed -i 's/MVN_PASSWORD/'$mvn_password'/' .github/workflows/settings.xml
       - name: Cat Settings.xml file
-        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
+        if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'settlement-service' && inputs.service_name != 'settlement-service' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
         run: cat .github/workflows/settings.xml
       - name: Converting upper case to lower case
         id: string
@@ -96,8 +96,8 @@ jobs:
       - name: set branch-name
         id: branch-name
         run: |
-          echo "BRANCH_NAME=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_ENV
-          echo "branch=$(echo $GITHUB_REF_NAME | sed "s/[^a-zA-Z0-9]/-/g")" >> $GITHUB_OUTPUT
+          echo "BRANCH_NAME=$(echo ${GITHUB_BASE_REF:-$GITHUB_REF_NAME} | sed 's/[^a-zA-Z0-9]/-/g')" >> $GITHUB_ENV
+          echo "branch=$(echo ${GITHUB_BASE_REF:-$GITHUB_REF_NAME} | sed 's/[^a-zA-Z0-9]/-/g')" >> $GITHUB_OUTPUT
       - name: Check if image hash tag is already exist in ECR image repository
         id: hash-tag-exist
         run: |
@@ -149,7 +149,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             docker_files='rateservice|post-trade|data-agent|acceptorengine|acceptorenginewebsocket'
+             docker_files='rateservice|post-trade|data-agent|settlement-service|acceptorengine|acceptorenginewebsocket'
              if [[ "$docker_files" == *"$docker_folder"* ]]
              then
                command="docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile . -t $Docker_image --progress=plain"
