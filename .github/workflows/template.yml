@@ -226,6 +226,10 @@ jobs:
             fi
           done
           echo "git commit"
+          if git diff --cached --quiet; then
+            echo "No changes detected, skipping commit/push."
+            exit 0
+          fi
           git commit -m "change tag of ${dir_name} to $tag on $branch_name"
           echo "git pull"
           git pull origin develop --autostash
