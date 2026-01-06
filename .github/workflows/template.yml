@@ -71,10 +71,20 @@ jobs:
       - name: Read secrets of user and pass from AWS Secrets Manager and convert values in settings.xml
         if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'settlement-service' && inputs.service_name != 'telegram-otc-bot' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }} 
         run: |
-          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r '.MVN_USERNAME')
+          # 1. Fetch Username (with fallback if not JSON)
+          mvn_username=$(aws secretsmanager get-secret-value --secret-id mvn_username --region us-east-1 --query SecretString --output text | jq -r 'if type=="object" then .MVN_USERNAME else . end')
           echo "mvnuser: $mvn_username"
-          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r '.MVN_PASSWORD')
-          echo "mvnpass: $mvn_passworbranchd"
+          
+          # 2. Fetch Password (with fallback if not JSON)
+          mvn_password=$(aws secretsmanager get-secret-value --secret-id mvn_password --region us-east-1 --query SecretString --output text | jq -r 'if type=="object" then .MVN_PASSWORD else . end')
+          
+          # 3. Security Check (Stop if password failed to fetch)
+          if [ -z "$mvn_password" ] || [ "$mvn_password" == "null" ]; then
+            echo "ERROR: Could not fetch mvn_password from AWS"
+            exit 1
+          fi
+          
+          # 4. Inject into settings.xml using | as delimiter
           sed -i "s|MVN_USERNAME|$mvn_username|g" .github/workflows/settings.xml
           sed -i "s|MVN_PASSWORD|$mvn_password|g" .github/workflows/settings.xml
       - name: Cat Settings.xml file
