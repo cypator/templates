@@ -90,6 +90,8 @@ jobs:
       - name: Cat Settings.xml file
         if: ${{ inputs.service_name != 'data-agent' && inputs.service_name != 'prisma' && inputs.service_name != 'backoffice' && inputs.service_name != 'settlement-service' && inputs.service_name != 'settlement-service' && inputs.service_name != 'telegram-otc-bot' && inputs.service_name != 'identity' && inputs.service_name != 'trading-webserver' && inputs.service_name != 'trading-nextjs' }}
         run: cat .github/workflows/settings.xml
+      - name: Test GitHub Packages auth
+        run: curl -s -o /dev/null -w "%{http_code}" -u "ketanCypator:$mvn_password" https://maven.pkg.github.com/cypator/packages/        
       - name: Converting upper case to lower case
         id: string
         uses: ASzc/change-string-case-action@v2
