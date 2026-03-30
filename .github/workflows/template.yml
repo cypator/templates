@@ -217,11 +217,11 @@ jobs:
         run: |
           repo_name=${{ steps.string.outputs.lowercase }}
           gcloud artifacts repositories describe $repo_name \
-            --location=us-east5 \
+            --location=us-east4 \
             --project=cypator-uat 2>/dev/null \
           || gcloud artifacts repositories create $repo_name \
             --repository-format=docker \
-            --location=us-east5 \
+            --location=us-east4 \
             --project=cypator-uat
 
       # ─── GCP: Push image to Artifact Registry ─────────────────────────
@@ -229,9 +229,9 @@ jobs:
         if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          GCP_REGISTRY: us-east5-docker.pkg.dev/cypator-uat
+          GCP_REGISTRY: us-east4-docker.pkg.dev/cypator-uat
         run: |
-          gcloud auth configure-docker us-east5-docker.pkg.dev --quiet
+          gcloud auth configure-docker us-east4-docker.pkg.dev --quiet
           repo_name=${{ steps.string.outputs.lowercase }}
           IMAGE_HASH=${{ steps.service-hashes.outputs.image_hash }}
           TAG=${{ github.run_number }}
