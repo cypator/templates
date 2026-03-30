@@ -20,7 +20,7 @@ on:
         required: true
       gcp-sa-key:
         description: "GCP service account key for Artifact Registry"
-        required: true
+        required: false
 jobs:
   docker-build:
     runs-on: ubuntu-24.04
