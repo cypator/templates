@@ -234,7 +234,12 @@ jobs:
           gcloud auth configure-docker us-east4-docker.pkg.dev --quiet
           repo_name=${{ steps.string.outputs.lowercase }}
           IMAGE_HASH=${{ steps.service-hashes.outputs.image_hash }}
-          TAG=${{ github.run_number }}
+
+          # Use the SAME numeric tag as the AWS/ECR image so the AWS helm and
+          # GCP helm reference an identical tag. The Retag step above has
+          # already applied this numeric tag to the ECR image by now.
+          TAG=$(aws ecr describe-images --repository-name $repo_name --image-ids imageTag=$IMAGE_HASH --output json | jq -r '.imageDetails[0].imageTags[] | select(test("^[0-9]+$"))')
+          echo "GCP image tag (from ECR): $TAG"
 
           # Pull from ECR, tag for GCP, push
           docker pull $ECR_REGISTRY/$repo_name:$IMAGE_HASH
@@ -289,39 +294,51 @@ jobs:
           branch_name: ${{ env.BRANCH_NAME }}
           dir_name: "${{ steps.string.outputs.lowercase }}"
 
-      # ─── GCP: Update values.yaml tag ───────────────────────────────────
+      # ─── GCP: Update values file tag (same logic as AWS, gcp/ path,
+      #         lonprod excluded — lonprod is not deployed on GCP) ──────────
       - name: Push new tag to GCP values file
         if: steps.branch-name.outputs.branch == 'develop' || steps.branch-name.outputs.branch == 'uat' || steps.branch-name.outputs.branch == 'production'
         run: |
           cd devops
-          export tag=${{ github.run_number }}
-
-          yamlfile="./gcp/helm/services/${dir_name}/values.yaml"
-
-          if [ -f "$yamlfile" ]; then
+          echo "git branch"
+          git branch
+          export tag=$(aws ecr describe-images --repository-name ${{ steps.string.outputs.lowercase }} --image-ids imageTag=${{ steps.service-hashes.outputs.image_hash }} --output json |jq -r '.imageDetails[0].imageTags[] | select(test("^[0-9]+$"))')
+          echo $tag
+          if [[ $branch_name == 'develop' ]]; then
+          file_names=("values-cycling.yaml")
+          elif [[ $branch_name == 'production' ]]; then
+            file_names=("values-prod.yaml")
+          else
+            file_names=("values-${branch_name}.yaml")
+          fi
+          git config --global user.email "devops_automation@cypator.com"
+          git config --global user.name "DevOps Automation"
+          git config pull.rebase true
+          for file_name in "${file_names[@]}"; do
+            yamlfile="./gcp/helm/services/${dir_name}/${file_name}"
             yq '.image.tag = env(tag)' -i "$yamlfile"
             cat $yamlfile
-            git add gcp/helm/services/${dir_name}/values.yaml
-
-            # Mirror services (same as AWS logic)
-            mirror_services=$(echo $(cat scripts/ecr_overwrite.json) | jq -r ".\"$dir_name\"")
+            git add gcp/helm/services/${dir_name}/${file_name}
+            echo "check mirror services:"
+            mirror_services=$(echo $(cat scripts/ecr_overwrite.json) | jq  -r ".\"$dir_name\"")
             if [ "$mirror_services" != "null" ]; then
               IFS=","
               for service in $mirror_services; do
-                echo "change GCP tag of $service also"
-                mirror_file="./gcp/helm/services/${service}/values.yaml"
-                if [ -f "$mirror_file" ]; then
-                  yq '.image.tag = env(tag)' -i "$mirror_file"
-                  git add gcp/helm/services/${service}/values.yaml
-                fi
+                echo "change tag of $service also"
+                yamlfile="./gcp/helm/services/${service}/${file_name}"
+                yq  '.image.tag = env(tag)' -i "$yamlfile"
+                cat $yamlfile
+                git add gcp/helm/services/${service}/${file_name}
               done
               unset IFS
             fi
-
-            git commit -m "gcp: update tag of ${dir_name} to $tag on $branch_name" || echo "nothing to commit"
-            git pull origin develop --autostash
-            git push --force-with-lease
-          fi
+          done
+          echo "git commit"
+          git commit -m "gcp: change tag of ${dir_name} to $tag on $branch_name"
+          echo "git pull"
+          git pull origin develop --autostash
+          echo "git push"
+          git push --force-with-lease
         env:
           branch_name: ${{ env.BRANCH_NAME }}
           dir_name: "${{ steps.string.outputs.lowercase }}"
