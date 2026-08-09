@@ -39,7 +39,7 @@ jobs:
         id: service-hashes
         run: |
           service=$(echo ${{ inputs.service_name }})
-          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'settlement-service' && $service != 'telegram-otc-bot' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' && $service != 'acceptorenginewebsocket' && $service != 'rateservice'  ]]
+          if [[  $service != 'identity' && $service != 'data-agent' && $service != 'backoffice' && $service != 'settlement-service' && $service != 'telegram-otc-bot' && $service != 'trading-webserver' && $service != 'trading-nextjs' && $service != 'post-trade' && $service != 'acceptorengine' && $service != 'acceptorenginewebsocket' && $service != 'rateservice' && $service != 'credit-service'  ]]
           then
             hashPath=$GITHUB_WORKSPACE/${{ inputs.service_name }}
             echo "hash path: $hashPath"
@@ -164,7 +164,7 @@ jobs:
             fi
           else
              echo "there are no arguments in docker file"
-             docker_files='rateservice|post-trade|data-agent|settlement-service|telegram-otc-bot|acceptorengine|acceptorenginewebsocket'
+             docker_files='rateservice|post-trade|data-agent|settlement-service|telegram-otc-bot|acceptorengine|acceptorenginewebsocket|credit-service'
              if [[ "$docker_files" == *"$docker_folder"* ]]
              then
                command="docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile . -t $Docker_image --progress=plain"
